@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('contact_type_id')->nullable();
+            $table->foreign('contact_type_id')->references('id')->on('contact_type')->onDelete('cascade');
             $table->string('name');
             $table->string('address');
             $table->string('npwp');
@@ -29,11 +29,7 @@ return new class extends Migration
             $table->string('account_number');
             $table->string('swift_code');
             $table->timestamps();
-
-            // Menetapkan foreign key ke kolom 'contact_type_id'
-            $table->foreign('contact_type_id')->references('id')->on('contact_type')->onDelete('set null');
         });
-
     }
 
     /**
@@ -41,11 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('companies', function (Blueprint $table) {
-            // Menghapus foreign key jika diperlukan
-            $table->dropForeign(['contact_type_id']);
-        });
-
         Schema::dropIfExists('companies');
     }
 };

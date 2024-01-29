@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('purchase_category_id')->constrained('purchases_categories');
+            $table->foreignId('purchase_category_id')->constrained('purchase_category');
+            $table->foreignId('purchase_status_id')->constrained('purchase_status');
             $table->string('project');
             $table->string('doc_no');
             $table->text('description')->nullable();
@@ -24,7 +25,6 @@ return new class extends Migration
             $table->string('file')->nullable();
             $table->date('date');
             $table->date('due_date');
-            $table->foreignId('purchase_status_id')->constrained('purchases_statuses');
             $table->string('created_by');
             $table->timestamps();
         });
