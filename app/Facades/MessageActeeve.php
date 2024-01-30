@@ -15,6 +15,33 @@ class MessageActeeve extends Response
         return response()->json($data, $statusCode);
     }
 
+    public static function success($message)
+    {
+        return response()->json([
+            'status' => self::SUCCESS,
+            'status_code' => self::HTTP_OK,
+            'message' => $message
+        ], self::HTTP_OK);
+    }
+
+    public static function created($message)
+    {
+        return response()->json([
+            'status' => self::SUCCESS,
+            'status_code' => self::HTTP_CREATED,
+            'message' => $message
+        ], self::HTTP_CREATED);
+    }
+
+    public static function notFound($message)
+    {
+        return response()->json([
+            'status' => self::WARNING,
+            'status_code' => self::HTTP_NOT_FOUND,
+            'message' => $message
+        ], self::HTTP_NOT_FOUND);
+    }
+
     public static function error($message)
     {
         return response()->json([
