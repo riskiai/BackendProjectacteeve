@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\ContactType;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -37,7 +38,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             PurchaseCategorySeeder::class,
-            PurchaseStatusSeeder::class
+            PurchaseStatusSeeder::class,
+            ContactTypeSeeder::class
         ]);
     }
 }

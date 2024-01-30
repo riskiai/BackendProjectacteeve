@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ContactTypeController;
+use App\Http\Controllers\PurchaseCategoryController;
+use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\User\RegisterController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +27,23 @@ Route::prefix('auth')->group(function () {
     Route::post('login', LoginController::class);
 });
 
-Route::prefix('user')->group(function () {
-    Route::post('register', RegisterController::class);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::prefix('user')->group(function () {
+        Route::post('register', RegisterController::class);
+    });
+
+    Route::prefix('contact-type')->group(function () {
+        Route::get('/', [ContactTypeController::class, 'index']);
+        Route::get('/{id}', [ContactTypeController::class, 'show']);
+    });
+
+    Route::prefix('purchase-category')->group(function () {
+        Route::get('/', [PurchaseCategoryController::class, 'index']);
+        Route::get('/{id}', [PurchaseCategoryController::class, 'show']);
+    });
+
+    Route::prefix('purchase-status')->group(function () {
+        Route::get('/', [PurchaseStatusController::class, 'index']);
+        Route::get('/{id}', [PurchaseStatusController::class, 'show']);
+    });
 });
