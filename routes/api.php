@@ -5,6 +5,7 @@ use App\Http\Controllers\ContactTypeController;
 use App\Http\Controllers\PurchaseCategoryController;
 use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\User\RegisterController;
+use App\Http\Controllers\User\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,7 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('user')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
         Route::post('register', RegisterController::class);
     });
 
