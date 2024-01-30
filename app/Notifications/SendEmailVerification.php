@@ -11,14 +11,15 @@ class SendEmailVerification extends Notification
 {
     use Queueable;
 
-    private $token;
+    private $token, $user;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($token)
+    public function __construct($token, $user)
     {
         $this->token = $token;
+        $this->user = $user;
     }
 
     /**
@@ -40,7 +41,7 @@ class SendEmailVerification extends Notification
             ->subject('Verifikasi akun anda')
             ->view(
                 'email.verification',
-                ['token' => $this->token]
+                ['token' => $this->token, 'user' => $this->user]
             );
     }
 

@@ -9,6 +9,7 @@ use App\Http\Requests\User\RegisterRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,15 +20,16 @@ class RegisterController extends Controller
         DB::beginTransaction();
 
         $role = Role::find($request->role);
+        $password = Str::random(6);
 
         $request->merge([
             'role_id' => $role->id,
-            'password' => Hash::make('ACT123')
+            'password' => Hash::make($password)
         ]);
 
         try {
             $user = User::create($request->all());
-
+            $user->passwordRecovery = $password;
             SendMail::verification($user);
 
             DB::commit();

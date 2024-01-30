@@ -16,7 +16,7 @@ class SendMail
             );
 
             $url = url("/auth/verification?token=$token&email=$user->email");
-            return Notification::route('mail', $user->email)->notify(new SendEmailVerification($url));
+            return Notification::route('mail', $user->email)->notify(new SendEmailVerification($url, $user));
         }
     }
 }

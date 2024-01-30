@@ -59,7 +59,7 @@ class User extends Authenticatable
     {
         $url = url("/auth/new-password?token=$token&email=$this->email");
 
-        $this->notify(new SendEmailVerification($url));
+        $this->notify(new SendEmailVerification($url, $this));
     }
 
     public function role(): HasOne
