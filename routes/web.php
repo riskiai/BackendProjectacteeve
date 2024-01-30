@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('form-email');
 });
 
 Route::get('auth/verification', VerificationController::class);
