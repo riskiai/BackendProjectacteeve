@@ -34,10 +34,18 @@ class LoginController extends Controller
         }
 
         try {
-            $token = $user->createToken('api', ['authenticated'])->plainTextToken;
+            $role = [strtolower($user->role->name)];
+            $token = $user->createToken('api', $role)->plainTextToken;
 
+            DB::commit();
             return MessageActeeve::render([
-                'data' => $user,
+                "id" => $user->id,
+                "role_id" => $user->role_id,
+                "name" => $user->name,
+                "email" => $user->email,
+                "email_verified_at" => $user->email_verified_at,
+                "created_at" => $user->created_at,
+                "updated_at" => $user->updated_at,
                 'secret' => $token,
             ]);
         } catch (\Throwable $th) {
