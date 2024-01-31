@@ -9,6 +9,14 @@ class Company extends Model
 {
     use HasFactory;
 
+    /**
+     * variable global yang bisa digunakan dimana aja
+     * berfungsi jika path salah, tidak perlu mengganti semuanya
+     * hanya perlu mengganti variable globalnya saja
+     */
+    const ATTACHMENT_NPWP = 'attachment/contact/npwp';
+    const ATTACHMENT_FILE = 'attachment/contact/file';
+
     protected $fillable = [
         'contact_type_id',
         'name',

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactTypeController;
 use App\Http\Controllers\PurchaseCategoryController;
 use App\Http\Controllers\PurchaseStatusController;
@@ -29,23 +30,30 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    // end point user
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('register', RegisterController::class);
     });
 
+    // end point contact type
     Route::prefix('contact-type')->group(function () {
         Route::get('/', [ContactTypeController::class, 'index']);
         Route::get('/{id}', [ContactTypeController::class, 'show']);
     });
 
+    // end point puchase category
     Route::prefix('purchase-category')->group(function () {
         Route::get('/', [PurchaseCategoryController::class, 'index']);
         Route::get('/{id}', [PurchaseCategoryController::class, 'show']);
     });
 
+    // end point puchase status
     Route::prefix('purchase-status')->group(function () {
         Route::get('/', [PurchaseStatusController::class, 'index']);
         Route::get('/{id}', [PurchaseStatusController::class, 'show']);
     });
+
+    // end point contact resource
+    Route::apiResource('contact', ContactController::class);
 });
