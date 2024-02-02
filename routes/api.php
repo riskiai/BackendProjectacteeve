@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactTypeController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseCategoryController;
 use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\User\RegisterController;
@@ -56,4 +57,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // end point contact resource data
     Route::apiResource('contact', ContactController::class);
+
+    // end point project resource
+    Route::apiResource('project', ProjectController::class);
 });
