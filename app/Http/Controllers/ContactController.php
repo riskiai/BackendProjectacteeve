@@ -97,7 +97,7 @@ class ContactController extends Controller
         }
 
         // untuk tidak menggunakan file terpisah
-        // karena belum ada kebutuhan khusu seperti index
+        // karena belum ada kebutuhan khusus seperti index
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,

@@ -54,6 +54,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{id}', [PurchaseStatusController::class, 'show']);
     });
 
-    // end point contact resource
+    // end point contact resource data
     Route::apiResource('contact', ContactController::class);
 });
