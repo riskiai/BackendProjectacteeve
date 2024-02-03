@@ -6,6 +6,7 @@ use App\Http\Controllers\ContactTypeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseCategoryController;
 use App\Http\Controllers\PurchaseStatusController;
+use App\Http\Controllers\TaxController;
 use App\Http\Controllers\User\RegisterController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Http\Request;
@@ -60,4 +61,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // end point project resource
     Route::apiResource('project', ProjectController::class);
+
+    // end point taxt resource
+    Route::apiResource('tax', TaxController::class);
 });

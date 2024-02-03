@@ -28,6 +28,7 @@ class Project extends Model
         'file',
     ];
 
+    /* Ngebuat Data ID Bisa String */
     protected static function boot()
     {
         parent::boot();
@@ -37,6 +38,7 @@ class Project extends Model
         });
     }
 
+    /* Ngebut Data Id Menjadi otomatis nambah */
     protected function generateSequenceNumber()
     {
         $lastId = static::max('id');
