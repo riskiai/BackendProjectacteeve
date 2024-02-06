@@ -74,6 +74,35 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function invoice($id)
+    {
+        $project = Project::find($id);
+        if (!$project) {
+            return MessageActeeve::notFound('data not found!');
+        }
+
+        $data = [];
+
+        foreach ($project->purchases as $purchase) {
+            $data[] = [
+                "date" => $purchase->date,
+                "contact" => $purchase->company->name,
+                "description" => $purchase->description,
+                "total" => $purchase->total,
+                "status" => [
+                    $purchase->purchase_status_id,
+                    $purchase->purchaseStatus->name
+                ]
+            ];
+        }
+
+        return MessageActeeve::render([
+            'status' => MessageActeeve::SUCCESS,
+            'status_code' => MessageActeeve::HTTP_OK,
+            'data' => $data
+        ]);
+    }
+
     public function update(UpdateRequest $request, $id)
     {
         DB::beginTransaction();

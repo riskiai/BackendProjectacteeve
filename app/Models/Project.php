@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Project extends Model
@@ -50,5 +51,10 @@ class Project extends Model
     public function company(): HasOne
     {
         return $this->hasOne(Company::class, 'id', 'company_id');
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class, 'project_id', 'id');
     }
 }
