@@ -15,6 +15,7 @@ class PurchaseStatus extends Model
     const OVERDUE = 4;
     const DUEDATE = 5;
     const REJECTED = 6;
+    const PAID = 7;
 
     protected $table = 'purchase_status';
 

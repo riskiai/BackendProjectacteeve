@@ -217,7 +217,7 @@ class PurchaseController extends Controller
         try {
             Purchase::whereDocNo($docNo)->update([
                 'tab' => Purchase::TAB_PAID,
-                'purchase_status_id' => PurchaseStatus::VERIFIED,
+                'purchase_status_id' => PurchaseStatus::PAID,
             ]);
 
             DB::commit();
