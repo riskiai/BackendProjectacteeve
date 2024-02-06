@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources\Purchase;
 
+use App\Models\Purchase;
+use App\Models\PurchaseStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -36,7 +38,7 @@ class PurchaseCollection extends ResourceCollection
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
                 "created_at" => $purchase->created_at,
-                "updated_at" => $purchase->updated_at
+                "updated_at" => $purchase->updated_at,
             ];
         }
 

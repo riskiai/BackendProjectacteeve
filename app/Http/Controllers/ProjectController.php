@@ -18,6 +18,16 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
+        if ($request->has('search')) {
+            $query->where(function ($query) use ($request) {
+                $query->where('id', 'like', '%' . $request->search . '%');
+                $query->orWhere('name', 'like', '%' . $request->search . '%');
+                $query->orWhereHas('company', function ($query) use ($request) {
+                    $query->where('name', 'like', '%' . $request->search . '%');
+                });
+            });
+        }
+
         $projects = $query->paginate($request->per_page);
 
         return new ProjectCollection($projects);
@@ -71,6 +81,35 @@ class ProjectController extends Controller
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
             ]
+        ]);
+    }
+
+    public function invoice($id)
+    {
+        $project = Project::find($id);
+        if (!$project) {
+            return MessageActeeve::notFound('data not found!');
+        }
+
+        $data = [];
+
+        foreach ($project->purchases as $purchase) {
+            $data[] = [
+                "date" => $purchase->date,
+                "contact" => $purchase->company->name,
+                "description" => $purchase->description,
+                "total" => $purchase->total,
+                "status" => [
+                    $purchase->purchase_status_id,
+                    $purchase->purchaseStatus->name
+                ]
+            ];
+        }
+
+        return MessageActeeve::render([
+            'status' => MessageActeeve::SUCCESS,
+            'status_code' => MessageActeeve::HTTP_OK,
+            'data' => $data
         ]);
     }
 
