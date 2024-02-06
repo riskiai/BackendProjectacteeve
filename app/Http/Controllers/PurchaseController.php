@@ -2,28 +2,76 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\Filters\Purchase\ByDate;
+use App\Facades\Filters\Purchase\ByProject;
+use App\Facades\Filters\Purchase\ByPurchaseID;
+use App\Facades\Filters\Purchase\ByStatus;
+use App\Facades\Filters\Purchase\ByTab;
+use App\Facades\Filters\Purchase\ByVendor;
 use App\Facades\MessageActeeve;
 use App\Http\Requests\Purchase\AcceptRequest;
 use App\Http\Requests\Purchase\CreateRequest;
 use App\Http\Requests\Purchase\UpdateRequest;
 use App\Http\Resources\Purchase\PurchaseCollection;
+use App\Http\Resources\Purchase\PurchaseCounting;
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseStatus;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class PurchaseController extends Controller
 {
+    public function counting(Request $request)
+    {
+        $purchaseId = $request->purchase_id ?? 1;
+
+        $countVerified = Purchase::where('purchase_id', $purchaseId)
+            ->where('purchase_status_id', PurchaseStatus::VERIFIED)
+            ->sum('total');
+        $countDueDate = Purchase::where('purchase_id', $purchaseId)
+            ->where('purchase_status_id', PurchaseStatus::DUEDATE)
+            ->sum('total');
+        $countPaymentRequest = Purchase::where('purchase_id', $purchaseId)
+            ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
+            ->sum('total');
+        $countPaid = Purchase::where('purchase_id', $purchaseId)
+            ->where('tab', Purchase::TAB_PAID)
+            ->sum('total');
+
+        return [
+            'status' => MessageActeeve::SUCCESS,
+            'status_code' => MessageActeeve::HTTP_OK,
+            "data" => [
+                "verified" => $countVerified,
+                "due_date" => $countDueDate,
+                "payment_request" => $countPaymentRequest,
+                "paid" => $countPaid,
+            ]
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Purchase::query();
 
-        $projects = $query->paginate($request->per_page);
+        $purchases = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                ByPurchaseID::class,
+                ByTab::class,
+                ByDate::class,
+                ByStatus::class,
+                ByVendor::class,
+                ByProject::class,
+            ])
+            ->thenReturn()
+            ->paginate($request->per_page);
 
-        return new PurchaseCollection($projects);
+        return new PurchaseCollection($purchases);
     }
 
     public function store(CreateRequest $request)

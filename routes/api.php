@@ -25,9 +25,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 Route::prefix('auth')->group(function () {
     Route::post('login', LoginController::class);
@@ -40,6 +40,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // end point user
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index']);
+        Route::get('me', function (Request $request) {
+            return $request->user();
+        });
         Route::post('register', RegisterController::class);
     });
 
@@ -71,6 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('tax', TaxController::class);
 
     // end point puchase resource
+    Route::get('purchase/counting', [PurchaseController::class, 'counting']);
     Route::put('purchase/accept/{id}', [PurchaseController::class, 'accept']);
     Route::put('purchase/reject/{id}', [PurchaseController::class, 'reject']);
     Route::put('purchase/request/{id}', [PurchaseController::class, 'request']);
