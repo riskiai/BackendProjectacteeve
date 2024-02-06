@@ -18,6 +18,16 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
+        if ($request->has('search')) {
+            $query->where(function ($query) use ($request) {
+                $query->where('id', 'like', '%' . $request->search . '%');
+                $query->orWhere('name', 'like', '%' . $request->search . '%');
+                $query->orWhereHas('company', function ($query) use ($request) {
+                    $query->where('name', 'like', '%' . $request->search . '%');
+                });
+            });
+        }
+
         $projects = $query->paginate($request->per_page);
 
         return new ProjectCollection($projects);
