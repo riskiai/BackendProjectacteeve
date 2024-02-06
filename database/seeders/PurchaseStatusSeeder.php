@@ -20,6 +20,7 @@ class PurchaseStatusSeeder extends Seeder
             'Open',
             'Overdue',
             'Due Date',
+            'Rejected',
         ];
 
         foreach ($status as $status) {

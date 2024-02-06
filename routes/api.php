@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactTypeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseCategoryController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\User\RegisterController;
@@ -29,6 +31,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('auth')->group(function () {
     Route::post('login', LoginController::class);
+
+    Route::post('logout', LogoutController::class)
+        ->middleware('auth:sanctum');
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -62,6 +67,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // end point project resource
     Route::apiResource('project', ProjectController::class);
 
-    // end point taxt resource
+    // end point tax resource
     Route::apiResource('tax', TaxController::class);
+
+    // end point puchase resource
+    Route::put('purchase/accept/{id}', [PurchaseController::class, 'accept']);
+    Route::put('purchase/reject/{id}', [PurchaseController::class, 'reject']);
+    Route::put('purchase/request/{id}', [PurchaseController::class, 'request']);
+    Route::put('purchase/payment/{id}', [PurchaseController::class, 'payment']);
+    Route::apiResource('purchase', PurchaseController::class);
 });

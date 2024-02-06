@@ -9,6 +9,13 @@ class PurchaseStatus extends Model
 {
     use HasFactory;
 
+    const AWAITING = 1;
+    const VERIFIED = 2;
+    const OPEN = 3;
+    const OVERDUE = 4;
+    const DUEDATE = 5;
+    const REJECTED = 6;
+
     protected $table = 'purchase_status';
 
     protected $fillable = [
