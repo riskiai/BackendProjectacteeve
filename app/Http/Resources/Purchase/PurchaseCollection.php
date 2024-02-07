@@ -22,19 +22,19 @@ class PurchaseCollection extends ResourceCollection
             $data[] = [
                 "doc_no" => $purchase->doc_no,
                 "doc_type" => $purchase->doc_type,
-                "purchase_type" => $purchase->purchase_id ? "Event Purchase" : "Operational Purchase",
+                "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "company_name" => $purchase->company->name,
                 "project_name" => $purchase->project->name,
-                "status" => [
-                    $purchase->purchaseStatus->id,
-                    $purchase->purchaseStatus->name
-                ],
+                "status" => $this->getStatus($purchase),
                 "description" => $purchase->description,
                 "remarks" => $purchase->remarks,
                 "sub_total" => $purchase->sub_total,
                 "ppn" => $purchase->ppn,
                 "total" => $purchase->total,
-                "file" => asset("storage/$purchase->file"),
+                "file_attachment" => [
+                    "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y') . ".pdf",
+                    "link" => asset("storage/$purchase->file"),
+                ],
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
                 "created_at" => $purchase->created_at,
@@ -43,5 +43,12 @@ class PurchaseCollection extends ResourceCollection
         }
 
         return $data;
+    }
+
+    protected function getStatus($purchase)
+    {
+        if (condition) {
+            # code...
+        }
     }
 }

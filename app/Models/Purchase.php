@@ -17,6 +17,9 @@ class Purchase extends Model
     const TAB_PAYMENT_REQUEST = 3;
     const TAB_PAID = 4;
 
+    const TEXT_EVENT = "Event Purchase";
+    const TEXT_OPERATIONAL = "Operational Purchase";
+
     protected $fillable = [
         'doc_no',
         'doc_type',

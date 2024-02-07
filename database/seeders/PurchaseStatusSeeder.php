@@ -21,6 +21,7 @@ class PurchaseStatusSeeder extends Seeder
             'Overdue',
             'Due Date',
             'Rejected',
+            'Paid',
         ];
 
         foreach ($status as $status) {

@@ -85,7 +85,7 @@ class PurchaseController extends Controller
             $request->merge([
                 'doc_no' => $this->generateDocNo($purchase, $purchaseCategory),
                 'doc_type' => Str::upper($purchaseCategory->name),
-                'purchase_status_id' => PurchaseStatus::OPEN,
+                'purchase_status_id' => PurchaseStatus::AWAITING,
                 'file' => $request->file('attachment_file')->store(Purchase::ATTACHMENT_FILE)
             ]);
 
@@ -112,7 +112,7 @@ class PurchaseController extends Controller
             "data" => [
                 "doc_no" => $purchase->doc_no,
                 "doc_type" => $purchase->doc_type,
-                "purchase_type" => $purchase->purchase_id ? "Event Purchase" : "Operational Purchase",
+                "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "company_name" => $purchase->company->name,
                 "project_name" => $purchase->project->name,
                 "status" => [
@@ -124,7 +124,10 @@ class PurchaseController extends Controller
                 "sub_total" => $purchase->sub_total,
                 "ppn" => $purchase->ppn,
                 "total" => $purchase->total,
-                "file" => asset("storage/$purchase->file"),
+                "file_attachment" => [
+                    "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y') . ".pdf",
+                    "link" => asset("storage/$purchase->file"),
+                ],
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
                 "created_at" => $purchase->created_at,
@@ -143,10 +146,6 @@ class PurchaseController extends Controller
         }
 
         try {
-            $request->merge([
-                'purchase_status_id' => PurchaseStatus::OPEN,
-            ]);
-
             if ($request->hasFile('attachment_file')) {
                 Storage::delete($purchase->file);
                 $request->merge([
@@ -194,7 +193,7 @@ class PurchaseController extends Controller
         }
 
         $request->merge([
-            'purchase_status_id' => PurchaseStatus::OPEN,
+            'purchase_status_id' => PurchaseStatus::VERIFIED,
             'tab' => Purchase::TAB_VERIFIED
         ]);
 
@@ -265,7 +264,7 @@ class PurchaseController extends Controller
         try {
             Purchase::whereDocNo($docNo)->update([
                 'tab' => Purchase::TAB_PAID,
-                'purchase_status_id' => PurchaseStatus::VERIFIED,
+                'purchase_status_id' => PurchaseStatus::PAID,
             ]);
 
             DB::commit();
