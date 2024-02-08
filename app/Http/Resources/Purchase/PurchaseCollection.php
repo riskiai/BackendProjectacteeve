@@ -4,6 +4,7 @@ namespace App\Http\Resources\Purchase;
 
 use App\Models\Purchase;
 use App\Models\PurchaseStatus;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -23,7 +24,7 @@ class PurchaseCollection extends ResourceCollection
                 "doc_no" => $purchase->doc_no,
                 "doc_type" => $purchase->doc_type,
                 "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
-                "company_name" => $purchase->company->name,
+                "vendor_name" => $purchase->company->name,
                 "project_name" => $purchase->project->name,
                 "status" => $this->getStatus($purchase),
                 "description" => $purchase->description,
@@ -47,8 +48,49 @@ class PurchaseCollection extends ResourceCollection
 
     protected function getStatus($purchase)
     {
-        if (condition) {
-            # code...
+        $data = [];
+
+        if ($purchase->tab == Purchase::TAB_SUBMIT) {
+            $data = [
+                "id" => $purchase->purchaseStatus->id,
+                "name" => $purchase->purchaseStatus->name,
+            ];
         }
+
+        if ($purchase->tab == Purchase::TAB_PAID) {
+            $data = [
+                "id" => $purchase->purchaseStatus->id,
+                "name" => $purchase->purchaseStatus->name,
+            ];
+        }
+
+        if (
+            $purchase->tab == Purchase::TAB_VERIFIED ||
+            $purchase->tab == Purchase::TAB_PAYMENT_REQUEST
+        ) {
+            $dueDate = Carbon::createFromFormat("Y-m-d", $purchase->due_date);
+            $nowDate = Carbon::now();
+
+            $data = [
+                "id" => PurchaseStatus::OPEN,
+                "name" => PurchaseStatus::TEXT_OPEN,
+            ];
+
+            if ($nowDate->gt($dueDate)) {
+                $data = [
+                    "id" => PurchaseStatus::OVERDUE,
+                    "name" => PurchaseStatus::TEXT_OVERDUE,
+                ];
+            }
+
+            if ($nowDate->toDateString() == $purchase->due_date) {
+                $data = [
+                    "id" => PurchaseStatus::DUEDATE,
+                    "name" => PurchaseStatus::TEXT_DUEDATE,
+                ];
+            }
+        }
+
+        return $data;
     }
 }

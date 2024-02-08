@@ -17,6 +17,14 @@ class PurchaseStatus extends Model
     const REJECTED = 6;
     const PAID = 7;
 
+    const TEXT_AWAITING = "Awaiting";
+    const TEXT_VERIFIED = "Verified";
+    const TEXT_OPEN = "Open";
+    const TEXT_OVERDUE = "Over Due";
+    const TEXT_DUEDATE = "Due Date";
+    const TEXT_REJECTED = "Rejected";
+    const TEXT_PAID = "Paid";
+
     protected $table = 'purchase_status';
 
     protected $fillable = [
