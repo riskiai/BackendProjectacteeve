@@ -42,6 +42,15 @@ class MessageActeeve extends Response
         ], self::HTTP_NOT_FOUND);
     }
 
+    public static function warning($message)
+    {
+        return response()->json([
+            'status' => self::WARNING,
+            'status_code' => self::HTTP_BAD_REQUEST,
+            'message' => $message
+        ], self::HTTP_BAD_REQUEST);
+    }
+
     public static function error($message)
     {
         return response()->json([

@@ -10,7 +10,7 @@ class ContactTypeController extends Controller
 {
     public function index()
     {
-        $contactTypes = ContactType::all();
+        $contactTypes = ContactType::whereNotIn("id", [2])->get();
 
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,

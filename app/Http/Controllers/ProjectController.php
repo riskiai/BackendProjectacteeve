@@ -7,6 +7,7 @@ use App\Http\Requests\Project\CreateRequest;
 use App\Http\Requests\Project\UpdateRequest;
 use App\Http\Resources\Project\ProjectCollection;
 use App\Models\Company;
+use App\Models\ContactType;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,9 @@ class ProjectController extends Controller
         DB::beginTransaction();
 
         $company = Company::find($request->client_id);
+        if ($company->contact_type_id == ContactType::CLIENT) {
+            return MessageActeeve::warning("this contact is not a client type");
+        }
 
         try {
             $request->merge([

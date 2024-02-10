@@ -26,6 +26,10 @@ class ContactController extends Controller
         // inisiasi company/contact dalam bentuk query, supaya bisa dilakukan untuk filtering
         $query = Company::query();
 
+        if ($request->has('contact_type')) {
+            $query->where('contact_type_id', $request->contact_type);
+        }
+
         // pembuatan kondisi ketika params search
         if ($request->has('search')) {
             // maka lakukan query bersarang seperti dibawah ini
