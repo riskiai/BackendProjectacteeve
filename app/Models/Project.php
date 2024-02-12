@@ -13,6 +13,10 @@ class Project extends Model
 
     const ATTACHMENT_FILE = 'attachment/project/file';
 
+    const STATUS_OPEN = 'OPEN';
+    const STATUS_CLOSED = 'CLOSED';
+    const STATUS_NEED_TO_CHECK = 'NEED TO CHECK';
+
     protected $table = 'projects';
 
     protected $keyType = 'string';

@@ -137,7 +137,7 @@ class PurchaseController extends Controller
                 ],
                 "total" => $purchase->total,
                 "file_attachment" => [
-                    "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y') . ".pdf",
+                    "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
                     "link" => asset("storage/$purchase->file"),
                 ],
                 "date" => $purchase->date,
