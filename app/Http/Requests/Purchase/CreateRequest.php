@@ -28,16 +28,27 @@ class CreateRequest extends FormRequest
         return [
             'purchase_id' => 'required|in:1,2',
             'purchase_category_id' => 'required|exists:purchase_category,id',
-            'company_id' => 'required|exists:companies,id',
+            'client_id' => 'required|exists:companies,id',
             'project_id' => 'required|exists:projects,id',
+            'tax_id' => 'required|exists:taxs,id',
             'description' => 'required',
             'remarks' => 'required',
             'sub_total' => 'required|numeric',
-            'ppn' => 'required|numeric',
             'total' => 'required|numeric',
             'attachment_file' => 'required|file|mimes:pdf',
             'date' => 'required|date',
             'due_date' => 'required|date',
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'purchase_id' => 'purchase type',
+            'purchase_category_id' => 'category purchase',
+            'client_id' => 'client',
+            'project_id' => 'project',
+            'tax_id' => 'tax',
         ];
     }
 

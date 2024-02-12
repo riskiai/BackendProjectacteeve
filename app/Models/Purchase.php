@@ -59,4 +59,9 @@ class Purchase extends Model
     {
         return $this->hasOne(PurchaseStatus::class, 'id', 'purchase_status_id');
     }
+
+    public function tax(): HasOne
+    {
+        return $this->hasOne(Tax::class, 'id', 'ppn');
+    }
 }

@@ -26,16 +26,25 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company_id' => 'required|exists:companies,id',
+            'client_id' => 'required|exists:companies,id',
             'project_id' => 'required|exists:projects,id',
+            'tax_id' => 'required|exists:taxs,id',
             'description' => 'required',
             'remarks' => 'required',
             'sub_total' => 'required|numeric',
-            'ppn' => 'required|numeric',
             'total' => 'required|numeric',
             'attachment_file' => 'file|mimes:pdf',
             'date' => 'required|date',
             'due_date' => 'required|date',
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'client_id' => 'client',
+            'project_id' => 'project',
+            'tax_id' => 'tax',
         ];
     }
 

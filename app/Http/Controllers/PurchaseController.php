@@ -14,9 +14,12 @@ use App\Http\Requests\Purchase\CreateRequest;
 use App\Http\Requests\Purchase\UpdateRequest;
 use App\Http\Resources\Purchase\PurchaseCollection;
 use App\Http\Resources\Purchase\PurchaseCounting;
+use App\Models\Company;
+use App\Models\ContactType;
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseStatus;
+use App\Models\Tax;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
@@ -81,12 +84,19 @@ class PurchaseController extends Controller
 
         $purchase = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
         $purchaseCategory = PurchaseCategory::find($request->purchase_category_id);
+        $tax = Tax::find($request->tax_id);
+        $company = Company::find($request->client_id);
+        if ($company->contact_type_id == ContactType::VENDOR) {
+            return MessageActeeve::warning("this contact is not a vendor type");
+        }
 
         try {
             $request->merge([
                 'doc_no' => $this->generateDocNo($purchase, $purchaseCategory),
                 'doc_type' => Str::upper($purchaseCategory->name),
                 'purchase_status_id' => PurchaseStatus::AWAITING,
+                'company_id' => $company->id,
+                'ppn' => $tax->id,
                 'file' => $request->file('attachment_file')->store(Purchase::ATTACHMENT_FILE)
             ]);
 
@@ -114,13 +124,17 @@ class PurchaseController extends Controller
                 "doc_no" => $purchase->doc_no,
                 "doc_type" => $purchase->doc_type,
                 "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
-                "company_name" => $purchase->company->name,
+                "vendor_name" => $purchase->company->name,
                 "project_name" => $purchase->project->name,
                 "status" => $this->getStatus($purchase),
                 "description" => $purchase->description,
                 "remarks" => $purchase->remarks,
                 "sub_total" => $purchase->sub_total,
-                "ppn" => $purchase->ppn,
+                "tax" => [
+                    "id" => $purchase->tax->id,
+                    "name" => $purchase->tax->name,
+                    "percent" => $purchase->tax->percent,
+                ],
                 "total" => $purchase->total,
                 "file_attachment" => [
                     "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y') . ".pdf",
@@ -129,7 +143,7 @@ class PurchaseController extends Controller
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
                 "created_at" => $purchase->created_at,
-                "updated_at" => $purchase->updated_at
+                "updated_at" => $purchase->updated_at,
             ]
         ]);
     }
@@ -143,6 +157,17 @@ class PurchaseController extends Controller
             return MessageActeeve::notFound('data not found!');
         }
 
+        $company = Company::find($request->client_id);
+        if ($company->contact_type_id == ContactType::VENDOR) {
+            return MessageActeeve::warning("this contact is not a vendor type");
+        }
+
+        $tax = Tax::find($request->tax_id);
+        $request->merge([
+            'ppn' => $tax->id,
+            'company_id' => $company->id,
+        ]);
+
         try {
             if ($request->hasFile('attachment_file')) {
                 Storage::delete($purchase->file);
@@ -151,7 +176,7 @@ class PurchaseController extends Controller
                 ]);
             }
 
-            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file']));
+            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax_id']));
 
             DB::commit();
             return MessageActeeve::success("doc no $docNo has been updated");

@@ -30,7 +30,11 @@ class PurchaseCollection extends ResourceCollection
                 "description" => $purchase->description,
                 "remarks" => $purchase->remarks,
                 "sub_total" => $purchase->sub_total,
-                "ppn" => $purchase->ppn,
+                "tax" => [
+                    "id" => $purchase->tax->id,
+                    "name" => $purchase->tax->name,
+                    "percent" => $purchase->tax->percent,
+                ],
                 "total" => $purchase->total,
                 "file_attachment" => [
                     "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y') . ".pdf",
