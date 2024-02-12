@@ -26,7 +26,7 @@ class AcceptRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pph' => 'required|numeric'
+            'pph_id' => 'required|exists:taxs,id'
         ];
     }
 

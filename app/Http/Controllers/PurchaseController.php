@@ -7,6 +7,7 @@ use App\Facades\Filters\Purchase\ByProject;
 use App\Facades\Filters\Purchase\ByPurchaseID;
 use App\Facades\Filters\Purchase\ByStatus;
 use App\Facades\Filters\Purchase\ByTab;
+use App\Facades\Filters\Purchase\ByTax;
 use App\Facades\Filters\Purchase\ByVendor;
 use App\Facades\MessageActeeve;
 use App\Http\Requests\Purchase\AcceptRequest;
@@ -71,6 +72,7 @@ class PurchaseController extends Controller
                 ByStatus::class,
                 ByVendor::class,
                 ByProject::class,
+                ByTax::class
             ])
             ->thenReturn()
             ->paginate($request->per_page);
@@ -117,34 +119,47 @@ class PurchaseController extends Controller
             return MessageActeeve::notFound('data not found!');
         }
 
+        $data = [
+            "doc_no" => $purchase->doc_no,
+            "doc_type" => $purchase->doc_type,
+            "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
+            "vendor_name" => $purchase->company->name,
+            "project_name" => $purchase->project->name,
+            "status" => $this->getStatus($purchase),
+            "description" => $purchase->description,
+            "remarks" => $purchase->remarks,
+            "sub_total" => $purchase->sub_total,
+            "total" => $purchase->total,
+            "file_attachment" => [
+                "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
+                "link" => asset("storage/$purchase->file"),
+            ],
+            "date" => $purchase->date,
+            "due_date" => $purchase->due_date,
+            "created_at" => $purchase->created_at,
+            "updated_at" => $purchase->updated_at,
+        ];
+
+        if ($purchase->pph) {
+            $data['tax_pph'] = [
+                "id" => $purchase->taxPph->id,
+                "name" => $purchase->taxPph->name,
+                "percent" => $purchase->taxPph->percent,
+            ];
+        }
+
+        if ($purchase->ppn) {
+            $data['tax_ppn'] = [
+                "id" => $purchase->taxPpn->id,
+                "name" => $purchase->taxPpn->name,
+                "percent" => $purchase->taxPpn->percent,
+            ];
+        }
+
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
-            "data" => [
-                "doc_no" => $purchase->doc_no,
-                "doc_type" => $purchase->doc_type,
-                "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
-                "vendor_name" => $purchase->company->name,
-                "project_name" => $purchase->project->name,
-                "status" => $this->getStatus($purchase),
-                "description" => $purchase->description,
-                "remarks" => $purchase->remarks,
-                "sub_total" => $purchase->sub_total,
-                "tax" => [
-                    "id" => $purchase->tax->id,
-                    "name" => $purchase->tax->name,
-                    "percent" => $purchase->tax->percent,
-                ],
-                "total" => $purchase->total,
-                "file_attachment" => [
-                    "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
-                    "link" => asset("storage/$purchase->file"),
-                ],
-                "date" => $purchase->date,
-                "due_date" => $purchase->due_date,
-                "created_at" => $purchase->created_at,
-                "updated_at" => $purchase->updated_at,
-            ]
+            "data" => $data
         ]);
     }
 
@@ -215,13 +230,16 @@ class PurchaseController extends Controller
             return MessageActeeve::notFound('data not found!');
         }
 
+        $pph = Tax::find($request->pph_id);
+
         $request->merge([
             'purchase_status_id' => PurchaseStatus::VERIFIED,
-            'tab' => Purchase::TAB_VERIFIED
+            'tab' => Purchase::TAB_VERIFIED,
+            'pph' => $pph->id
         ]);
 
         try {
-            Purchase::whereDocNo($docNo)->update($request->all());
+            Purchase::whereDocNo($docNo)->update($request->except('pph_id'));
 
             DB::commit();
             return MessageActeeve::success("purchase $docNo has been accepted");

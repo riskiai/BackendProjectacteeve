@@ -19,8 +19,8 @@ class PurchaseCollection extends ResourceCollection
     {
         $data = [];
 
-        foreach ($this as $purchase) {
-            $data[] = [
+        foreach ($this as $key => $purchase) {
+            $data[$key] = [
                 "doc_no" => $purchase->doc_no,
                 "doc_type" => $purchase->doc_type,
                 "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
@@ -30,11 +30,6 @@ class PurchaseCollection extends ResourceCollection
                 "description" => $purchase->description,
                 "remarks" => $purchase->remarks,
                 "sub_total" => $purchase->sub_total,
-                "tax" => [
-                    "id" => $purchase->tax->id,
-                    "name" => $purchase->tax->name,
-                    "percent" => $purchase->tax->percent,
-                ],
                 "total" => $purchase->total,
                 "file_attachment" => [
                     "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
@@ -45,6 +40,22 @@ class PurchaseCollection extends ResourceCollection
                 "created_at" => $purchase->created_at,
                 "updated_at" => $purchase->updated_at,
             ];
+
+            if ($purchase->pph) {
+                $data[$key]['tax_pph'] = [
+                    "id" => $purchase->taxPph->id,
+                    "name" => $purchase->taxPph->name,
+                    "percent" => $purchase->taxPph->percent,
+                ];
+            }
+
+            if ($purchase->ppn) {
+                $data[$key]['tax_ppn'] = [
+                    "id" => $purchase->taxPpn->id,
+                    "name" => $purchase->taxPpn->name,
+                    "percent" => $purchase->taxPpn->percent,
+                ];
+            }
         }
 
         return $data;

@@ -60,8 +60,13 @@ class Purchase extends Model
         return $this->hasOne(PurchaseStatus::class, 'id', 'purchase_status_id');
     }
 
-    public function tax(): HasOne
+    public function taxPpn(): HasOne
     {
         return $this->hasOne(Tax::class, 'id', 'ppn');
+    }
+
+    public function taxPph(): HasOne
+    {
+        return $this->hasOne(Tax::class, 'id', 'pph');
     }
 }
