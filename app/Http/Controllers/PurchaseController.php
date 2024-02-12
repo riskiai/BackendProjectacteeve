@@ -86,7 +86,12 @@ class PurchaseController extends Controller
 
         $purchase = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
         $purchaseCategory = PurchaseCategory::find($request->purchase_category_id);
+
         $tax = Tax::find($request->tax_id);
+        if (strtolower($tax->type) != Tax::TAX_PPN) {
+            return MessageActeeve::warning("this tax is not a ppn type");
+        }
+
         $company = Company::find($request->client_id);
         if ($company->contact_type_id == ContactType::VENDOR) {
             return MessageActeeve::warning("this contact is not a vendor type");
@@ -178,6 +183,10 @@ class PurchaseController extends Controller
         }
 
         $tax = Tax::find($request->tax_id);
+        if (strtolower($tax->type) != Tax::TAX_PPN) {
+            return MessageActeeve::warning("this tax is not a ppn type");
+        }
+
         $request->merge([
             'ppn' => $tax->id,
             'company_id' => $company->id,
@@ -231,6 +240,9 @@ class PurchaseController extends Controller
         }
 
         $pph = Tax::find($request->pph_id);
+        if (strtolower($pph->type) != Tax::TAX_PPH) {
+            return MessageActeeve::warning("this tax is not a pph type");
+        }
 
         $request->merge([
             'purchase_status_id' => PurchaseStatus::VERIFIED,
