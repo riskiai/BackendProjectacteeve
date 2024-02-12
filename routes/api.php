@@ -68,15 +68,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('contact', ContactController::class);
 
     // end point project resource
-    Route::get('project/counting', [ProjectController::class, 'counting']);
-    Route::get('project/invoice/{id}', [ProjectController::class, 'invoice']);
+    Route::get('project/counting', [ProjectController::class, 'counting']); // buat kotak besaar
+    Route::get('project/invoice/{id}', [ProjectController::class, 'invoice']); // Buat Transaction 
     Route::apiResource('project', ProjectController::class);
 
     // end point tax resource
     Route::apiResource('tax', TaxController::class);
 
     // end point puchase resource
-    Route::get('purchase/counting', [PurchaseController::class, 'counting']);
+    Route::get('purchase/counting', [PurchaseController::class, 'counting']); // buat kotak besar
     Route::put('purchase/accept/{id}', [PurchaseController::class, 'accept']);
     Route::put('purchase/reject/{id}', [PurchaseController::class, 'reject']);
     Route::put('purchase/request/{id}', [PurchaseController::class, 'request']);

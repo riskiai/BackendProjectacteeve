@@ -19,11 +19,36 @@
                 <td>{{ $purchase->project->name }}</td>
                 <td>{{ $purchase->doc_type }}</td>
                 <td>{{ $purchase->sub_total }}</td>
-                <td>{{ $purchase->taxPpn ? $purchase->sub_total / $purchase->taxPpn->percent : '-' }}</td>
-                <td>{{ $purchase->taxPph ? $purchase->sub_total / $purchase->taxPph->percent : '-' }}</td>
+                {{-- <td>{{ $purchase->taxPpn ? $purchase->sub_total / $purchase->taxPpn->percent : '-' }}</td>
+                <td>{{ $purchase->taxPph ? $purchase->sub_total / $purchase->taxPph->percent : '-' }}</td> --}}
                 <td>
-                    {{ $purchase->taxPpn && $purchase->taxPph ? $purchase->sub_total / $purchase->taxPpn->percent + $purchase->sub_total / $purchase->taxPph->percent : $purchase->total }}
+                    @if ($purchase->taxPpn && is_numeric($purchase->taxPpn->percent))
+                        {{ $purchase->sub_total / $purchase->taxPpn->percent }}
+                    @else
+                        -
+                    @endif
                 </td>
+                
+                <td>
+                    @if ($purchase->taxPph && is_numeric($purchase->taxPph->percent))
+                        {{ $purchase->sub_total / $purchase->taxPph->percent }}
+                    @else
+                        -
+                    @endif
+                </td>
+                
+                {{-- <td>
+                    {{ $purchase->taxPpn && $purchase->taxPph ? $purchase->sub_total / $purchase->taxPpn->percent + $purchase->sub_total / $purchase->taxPph->percent : $purchase->total }}
+                </td> --}}
+
+                <td>
+                    @if ($purchase->taxPpn && is_numeric($purchase->taxPpn->percent) && $purchase->taxPph && is_numeric($purchase->taxPph->percent))
+                        {{ ($purchase->sub_total / $purchase->taxPpn->percent) + ($purchase->sub_total / $purchase->taxPph->percent) }}
+                    @else
+                        {{ $purchase->total }}
+                    @endif
+                </td>
+                
             </tr>
         @endforeach
     </tbody>

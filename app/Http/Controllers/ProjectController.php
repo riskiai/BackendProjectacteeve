@@ -61,7 +61,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
 
         $company = Company::find($request->client_id);
-        if ($company->contact_type_id == ContactType::CLIENT) {
+        if ($company->contact_type_id != ContactType::CLIENT) {
             return MessageActeeve::warning("this contact is not a client type");
         }
 

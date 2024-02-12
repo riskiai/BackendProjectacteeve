@@ -93,7 +93,7 @@ class PurchaseController extends Controller
         }
 
         $company = Company::find($request->client_id);
-        if ($company->contact_type_id == ContactType::VENDOR) {
+        if ($company->contact_type_id != ContactType::VENDOR) {
             return MessageActeeve::warning("this contact is not a vendor type");
         }
 

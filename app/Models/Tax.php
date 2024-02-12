@@ -9,6 +9,7 @@ class Tax extends Model
 {
     use HasFactory;
 
+    /* Disini Dirubah Untuk + - */
     const TAX_PPN = "ppn";
     const TAX_PPH = "pph";
 
