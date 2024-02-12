@@ -52,7 +52,7 @@ class ProjectCollection extends ResourceCollection
             $total += $purchase->total;
         }
 
-        $costEstimate = round(($total / $project->cost_estimate) * 100, 2);
+        $costEstimate = round(($total / $project->billing) * 100, 2);
         if ($costEstimate > 90) {
             $status = Project::STATUS_NEED_TO_CHECK;
         }

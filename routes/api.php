@@ -68,6 +68,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('contact', ContactController::class);
 
     // end point project resource
+    Route::get('project/counting', [ProjectController::class, 'counting']);
     Route::get('project/invoice/{id}', [ProjectController::class, 'invoice']);
     Route::apiResource('project', ProjectController::class);
 

@@ -34,6 +34,28 @@ class ProjectController extends Controller
         return new ProjectCollection($projects);
     }
 
+    public function counting(Request $request)
+    {
+        $project = Project::select(DB::raw('SUM(billing) as billing, SUM(cost_estimate) as cost_estimate, SUM(margin) as margin'))->first();
+
+        $projects = Project::all();
+        $total = 0;
+        foreach ($projects as $project) {
+            $costProgress = $this->costProgress($project);
+            $total += $costProgress['total'];
+        }
+
+        $percent = ($project->billing / $total) * 100;
+        $percent = round($percent, 2) . "%";
+
+        return [
+            "billing" => $project->billing,
+            "cost_estimate" => $project->cost_estimate,
+            "margin" => $project->margin,
+            "percent" => $percent,
+        ];
+    }
+
     public function store(CreateRequest $request)
     {
         DB::beginTransaction();
@@ -81,7 +103,11 @@ class ProjectController extends Controller
                 'cost_estimate' => $project->cost_estimate,
                 'margin' => $project->margin,
                 'percent' => $project->percent,
-                'file' => asset("storage/$project->file"),
+                'file_attachment' => [
+                    'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.pdf',
+                    'link' => asset("storage/$project->file")
+                ],
+                'cost_progress' => $this->costProgress($project),
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
             ]
@@ -167,5 +193,30 @@ class ProjectController extends Controller
             DB::rollBack();
             return MessageActeeve::error($th->getMessage());
         }
+    }
+
+    protected function costProgress($project)
+    {
+        $status = Project::STATUS_OPEN;
+        $total = 0;
+
+        foreach ($project->purchases as $purchase) {
+            $total += $purchase->total;
+        }
+
+        $costEstimate = round(($total / $project->billing) * 100, 2);
+        if ($costEstimate > 90) {
+            $status = Project::STATUS_NEED_TO_CHECK;
+        }
+
+        if ($costEstimate == 100) {
+            $status = Project::STATUS_CLOSED;
+        }
+
+        return [
+            'status' => $status,
+            'percent' => $costEstimate . '%',
+            'total' => $total
+        ];
     }
 }
