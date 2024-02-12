@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\Tax\TaxCollection;
-use App\Facades\MessageActeeve;
 use App\Models\Tax;
 use Illuminate\Http\Request;
+use App\Facades\MessageActeeve;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Tax\CreateRequest;
+use App\Http\Requests\Tax\UpdateRequest;
+use App\Http\Resources\Tax\TaxCollection;
 
 class TaxController extends Controller
 {
@@ -25,7 +27,7 @@ class TaxController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateRequest $request)
     {
         DB::beginTransaction();
 
@@ -68,7 +70,7 @@ class TaxController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRequest $request, $id)
     {
         DB::beginTransaction();
 
