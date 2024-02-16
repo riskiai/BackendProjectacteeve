@@ -22,15 +22,15 @@
             <h1>PT ACTEEVE INDONESIA</h1>
         </header>
         <section>
-            <h3>Hallo, {{ $user->user }}</h3>
+            <h3>Hallo, {{ $user->name }}</h3>
             <p><strong>Selamat <br> Registrasi akun anda Telah Berhasil.</strong></p>
-            <p style="text-align:center;"><strong>Email : {{ $user->email }}</strong></p>
-            <p style="text-align:center;"><strong>Password : {{ $user->passwordRecovery }}</strong></p>
+            <p><strong>Email : {{ $user->email }}</strong></p>
+            <p><strong>Password : {{ $user->passwordRecovery }}</strong></p>
             <p><strong>Terimakasih <br> Sudah mengguanakan layanan kami. <br> <br>
-                    <h3 style="color: white;">Hormat Kami <br><br> PT ACTEEVE INDONESIA</h3>
+                    <h3>Hormat Kami <br><br> PT ACTEEVE INDONESIA</h3>
         </section>
         <footer>
-            <p>Terima kasih</p>
+            <p> <strong>Terima kasih</strong></p>
         </footer>
     </div>
 
