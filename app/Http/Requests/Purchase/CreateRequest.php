@@ -35,7 +35,7 @@ class CreateRequest extends FormRequest
             'remarks' => 'required',
             'sub_total' => 'required|numeric',
             'total' => 'required|numeric',
-            'attachment_file' => 'required|file|mimes:pdf',
+            'attachment_file' => 'required|file|mimes:pdf|max:5120',
             'date' => 'required|date',
             'due_date' => 'required|date',
         ];

@@ -33,7 +33,7 @@ class CreateRequest extends FormRequest
             'margin' => 'required|numeric',
             'cost_estimate' => 'required|numeric',
             'percent' => 'required',
-            'attachment_file' => 'required|file|mimes:pdf'
+            'attachment_file' => 'required|file|mimes:pdf|max:5120'
         ];
     }
 

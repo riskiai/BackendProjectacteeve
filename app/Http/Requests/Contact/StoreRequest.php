@@ -35,11 +35,11 @@ class StoreRequest extends FormRequest
             'currency' => 'required|max:255',
             'account_number' => 'required|numeric',
             'swift_code' => 'required|max:255',
-            'attachment_npwp' => 'required|file|mimes:pdf',
+            'attachment_npwp' => 'required|file|mimes:pdf|max:5120',
             'pic_name' => 'required|max:255',
             'phone' => 'required|numeric',
             'email' => 'required|email|max:255',
-            'attachment_file' => 'required|file|mimes:pdf',
+            'attachment_file' => 'required|file|mimes:pdf|max:5120',
         ];
     }
 

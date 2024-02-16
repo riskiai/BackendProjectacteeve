@@ -33,7 +33,7 @@ class UpdateRequest extends FormRequest
             'remarks' => 'required',
             'sub_total' => 'required|numeric',
             'total' => 'required|numeric',
-            'attachment_file' => 'file|mimes:pdf',
+            'attachment_file' => 'file|mimes:pdf|max:5120',
             'date' => 'required|date',
             'due_date' => 'required|date',
         ];
