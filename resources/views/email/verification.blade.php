@@ -26,7 +26,7 @@
             <p><strong>Selamat <br> Registrasi akun anda Telah Berhasil.</strong></p>
             <p><strong>Email : {{ $user->email }}</strong></p>
             <p><strong>Password : {{ $user->passwordRecovery }}</strong></p>
-            <p><strong>Terimakasih <br> Sudah mengguanakan layanan kami. <br> <br>
+            <p><strong>Terima <br> Sudah mengguanakan layanan kami. <br> <br>
                     <h3>Hormat Kami <br><br> PT ACTEEVE INDONESIA</h3>
         </section>
         <footer>
