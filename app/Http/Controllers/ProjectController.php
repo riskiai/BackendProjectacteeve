@@ -29,6 +29,13 @@ class ProjectController extends Controller
             });
         }
 
+        if ($request->has('date')) {
+            $date = str_replace(['[', ']'], '', $request->date);
+            $date = explode(", ", $date);
+
+            $query->whereBetween('created_at', $date);
+        }
+
         $projects = $query->paginate($request->per_page);
 
         return new ProjectCollection($projects);

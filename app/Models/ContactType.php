@@ -12,6 +12,9 @@ class ContactType extends Model
     const VENDOR = 1;
     const CLIENT = 3;
 
+    const SHORT_VENDOR = "VACT-";
+    const SHORT_CLIENT = "CLT-";
+
     protected $table = 'contact_type';
 
     protected $fillable = [

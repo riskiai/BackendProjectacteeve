@@ -107,17 +107,18 @@ class ContactController extends Controller
             'status_code' => MessageActeeve::HTTP_OK,
             'data' =>  [
                 "id" => $contact->id,
+                "uuid" => $this->generateUuid($contact),
                 "contact_type" => [
                     "id" => $contact->contactType->id,
                     "name" => $contact->contactType->name,
                 ],
                 "name" => $contact->name,
                 "address" => $contact->address,
-                "npwp" => asset("storage/$contact->npwp"),
+                "attachment_npwp" => asset("storage/$contact->npwp"),
                 "pic_name" => $contact->pic_name,
                 "phone" => $contact->phone,
                 "email" => $contact->email,
-                "file" => asset("storage/$contact->file"),
+                "attachment_file" => asset("storage/$contact->file"),
                 "bank_name" => $contact->bank_name,
                 "branch" => $contact->branch,
                 "account_name" => $contact->account_name,
@@ -214,5 +215,15 @@ class ContactController extends Controller
             DB::rollBack();
             return MessageActeeve::error($th->getMessage());
         }
+    }
+
+    protected function generateUuid($contact)
+    {
+        $id = str_pad($contact->id, 3, 0, STR_PAD_LEFT);
+        if ($contact->contactType->id == ContactType::VENDOR) {
+            return ContactType::SHORT_VENDOR . $id;
+        }
+
+        return ContactType::SHORT_CLIENT . $id;
     }
 }
