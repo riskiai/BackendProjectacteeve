@@ -25,6 +25,7 @@ class ProjectCollection extends ResourceCollection
                     'name' => $project->company->name,
                     'contact_type' => $project->company->contactType->name,
                 ],
+                'date' => $project->date,
                 'name' => $project->name,
                 'billing' => $project->billing,
                 'cost_estimate' => $project->cost_estimate,
