@@ -28,7 +28,7 @@ class UpdateRequest extends FormRequest
         return [
             'name' => 'required',
             'description' => 'required',
-            'percent' => 'required',
+            'percent' => 'required|numeric',
             'type' => 'required',
         ];
     }
