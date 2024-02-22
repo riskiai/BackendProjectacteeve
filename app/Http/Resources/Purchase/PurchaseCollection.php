@@ -2,11 +2,10 @@
 
 namespace App\Http\Resources\Purchase;
 
-use Carbon\Carbon;
 use App\Models\Purchase;
-use Illuminate\Http\Request;
 use App\Models\PurchaseStatus;
-use App\Models\PurchaseCategory;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class PurchaseCollection extends ResourceCollection
@@ -24,8 +23,7 @@ class PurchaseCollection extends ResourceCollection
             $data[$key] = [
                 "doc_no" => $purchase->doc_no,
                 "doc_type" => $purchase->doc_type,
-                "purchase_type" => $purchase->purchase_category_id == PurchaseCategory::CATEGORY_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
-
+                "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "vendor_name" => $purchase->company->name,
                 "project_name" => $purchase->project->name,
                 "status" => $this->getStatus($purchase),

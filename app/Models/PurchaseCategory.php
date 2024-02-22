@@ -15,8 +15,7 @@ class PurchaseCategory extends Model
     const MAN_POWER = 3;
     const EXPENSE = 4;
     const REIMBURSEMENT = 5;
-    const CATEGORY_EVENT = 6; 
-    const CATEGORY_OPERATIONAL = 7; 
+    
 
     protected $table = 'purchase_category';
 
