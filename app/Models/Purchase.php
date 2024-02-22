@@ -20,6 +20,9 @@ class Purchase extends Model
     const TEXT_EVENT = "Event Purchase";
     const TEXT_OPERATIONAL = "Operational Purchase";
 
+    const TYPE_EVENT = 1;
+    const TYPE_OPERATIONAL = 2;
+
     protected $fillable = [
         'doc_no',
         'doc_type',

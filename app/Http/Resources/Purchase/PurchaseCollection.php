@@ -23,7 +23,7 @@ class PurchaseCollection extends ResourceCollection
             $data[$key] = [
                 "doc_no" => $purchase->doc_no,
                 "doc_type" => $purchase->doc_type,
-                "purchase_type" => $purchase->purchase_id ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
+                "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "vendor_name" => $purchase->company->name,
                 "project_name" => $purchase->project->name,
                 "status" => $this->getStatus($purchase),
