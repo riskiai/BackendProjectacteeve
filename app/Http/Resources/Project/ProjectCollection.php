@@ -50,7 +50,7 @@ class ProjectCollection extends ResourceCollection
         $total = 0;
 
         foreach ($project->purchases as $purchase) {
-            $total += $purchase->total;
+            $total += $purchase->sub_total;
         }
 
         $costEstimate = round(($total / $project->billing) * 100, 2);

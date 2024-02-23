@@ -105,6 +105,7 @@ class ProjectController extends Controller
                     'name' => $project->company->name,
                     'contact_type' => $project->company->contactType->name,
                 ],
+                'date' => $project->date,
                 'name' => $project->name,
                 'billing' => $project->billing,
                 'cost_estimate' => $project->cost_estimate,
@@ -208,7 +209,7 @@ class ProjectController extends Controller
         $total = 0;
 
         foreach ($project->purchases as $purchase) {
-            $total += $purchase->total;
+            $total += $purchase->sub_total;
         }
 
         $costEstimate = round(($total / $project->billing) * 100, 2);
@@ -223,7 +224,7 @@ class ProjectController extends Controller
         return [
             'status' => $status,
             'percent' => $costEstimate . '%',
-            'total' => $total
+            'real_cost' => $total
         ];
     }
 }

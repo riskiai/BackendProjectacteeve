@@ -17,6 +17,7 @@ use App\Http\Resources\Purchase\PurchaseCollection;
 use App\Http\Resources\Purchase\PurchaseCounting;
 use App\Models\Company;
 use App\Models\ContactType;
+use App\Models\Document;
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseStatus;
@@ -122,33 +123,34 @@ class PurchaseController extends Controller
             return MessageActeeve::notFound('data not found!');
         }
 
-        $data = [
-            "doc_no" => $purchase->doc_no,
-            "doc_type" => $purchase->doc_type,
-            "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
-            "vendor_name" => $purchase->company->name,
-            "project_name" => $purchase->project->name,
-            "status" => $this->getStatus($purchase),
-            "description" => $purchase->description,
-            "remarks" => $purchase->remarks,
-            "sub_total" => $purchase->sub_total,
-            "total" => $purchase->total,
-            "file_attachment" => [
-                "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
-                "link" => asset("storage/$purchase->file"),
-            ],
-            "date" => $purchase->date,
-            "due_date" => $purchase->due_date,
-            "created_at" => $purchase->created_at,
-            "updated_at" => $purchase->updated_at,
-        ];
+        $data =
+            [
+                "doc_no" => $purchase->doc_no,
+                "doc_type" => $purchase->doc_type,
+                "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
+                "vendor_name" => $purchase->company->name,
+                "status" => $this->getStatus($purchase),
+                "description" => $purchase->description,
+                "remarks" => $purchase->remarks,
+                "sub_total" => $purchase->sub_total,
+                "total" => $purchase->total,
+                "file_attachment" => $this->getDocument($purchase),
+                "date" => $purchase->date,
+                "due_date" => $purchase->due_date,
+                "ppn" => $this->getPpn($purchase),
+                "created_at" => $purchase->created_at,
+                "updated_at" => $purchase->updated_at,
+            ];
+
+        if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
+            $data['project'] = [
+                "id" => $purchase->project->id,
+                "name" => $purchase->project->name,
+            ];
+        }
 
         if ($purchase->pph) {
-            $data['tax_pph'] = [
-                "id" => $purchase->taxPph->id,
-                "name" => $purchase->taxPph->name,
-                "percent" => $purchase->taxPph->percent,
-            ];
+            $data['pph'] = $this->getPph($purchase);
         }
 
         return MessageActeeve::render([
@@ -178,11 +180,10 @@ class PurchaseController extends Controller
         ]);
 
         try {
-            if ($request->hasFile('attachment_file')) {
-                Storage::delete($purchase->file);
-                $request->merge([
-                    'file' => $request->file('attachment_file')->store(Purchase::ATTACHMENT_FILE),
-                ]);
+            if ($request->has('attachment_file')) {
+                foreach ($request->attachment_file as $key => $file) {
+                    $this->saveDocument($purchase, $file, $key + 1);
+                }
             }
 
             Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax_id']));
@@ -313,12 +314,47 @@ class PurchaseController extends Controller
         }
     }
 
+    public function deleteDocument($id)
+    {
+        DB::beginTransaction();
+
+        $purchase = Document::find($id);
+        if (!$purchase) {
+            return MessageActeeve::notFound('data not found!');
+        }
+
+        try {
+            Storage::delete($purchase->path_file);
+            $purchase->delete();
+
+            DB::commit();
+            return MessageActeeve::success("document $id delete successfully");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
+    }
+
     protected function generateDocNo($maxPurchase, $purchaseCategory)
     {
         $numericPart = (int) substr($maxPurchase, strpos($maxPurchase, '-') + 1);
         $nextNumber = sprintf('%03d', $numericPart + 1);
 
         return "$purchaseCategory->short-$nextNumber";
+    }
+    protected function getDocument($documents)
+    {
+        $data = [];
+
+        foreach ($documents->documents as $document) {
+            $data[] = [
+                "id" => $document->id,
+                "name" => $document->purchase->doc_type . "/$document->doc_no.$document->id/" . date('Y', strtotime($document->created_at)) . ".pdf",
+                "link" => asset("storage/$document->file_path"),
+            ];
+        }
+
+        return $data;
     }
 
     protected function getStatus($purchase)
@@ -369,13 +405,13 @@ class PurchaseController extends Controller
         return $data;
     }
 
-    protected function saveDocument($purchase, $file, $iteration)
+    protected function getPpn($purchase)
     {
-        $document = $file->store(Purchase::ATTACHMENT_FILE);
-        return $purchase->documents()->create([
-            "doc_no" => $purchase->doc_no,
-            "file_name" => $purchase->doc_no . '.' . $iteration,
-            "file_path" => $document
-        ]);
+        return ($purchase->sub_total * $purchase->ppn) / 100;
+    }
+
+    protected function getPph($purchase)
+    {
+        return (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100;
     }
 }

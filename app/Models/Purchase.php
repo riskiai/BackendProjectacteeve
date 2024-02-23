@@ -43,11 +43,19 @@ class Purchase extends Model
 
     public function getTotalAttribute()
     {
+        $total = 0;
+
         if ($this->attributes['ppn']) {
             $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
-            return $this->attributes['sub_total'] + $ppn;
+            $total = $this->attributes['sub_total'] + $ppn;
         }
-        return $this->attributes['sub_total'];
+
+        if ($this->attributes['pph']) {
+            $pph = ($total * $this->taxPph->percent) / 100;
+            $total -= $pph;
+        }
+
+        return $total;
     }
 
     public function purchaseCategory(): HasOne

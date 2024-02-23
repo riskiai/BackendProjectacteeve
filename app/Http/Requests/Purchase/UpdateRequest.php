@@ -25,18 +25,25 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $request = [
+            'purchase_id' => 'required|in:1,2',
+            'purchase_category_id' => 'required|exists:purchase_category,id',
             'client_id' => 'required|exists:companies,id',
-            'project_id' => 'required|exists:projects,id',
-            'tax_id' => 'required|exists:taxs,id',
+            'tax' => 'required',
             'description' => 'required',
             'remarks' => 'required',
             'sub_total' => 'required|numeric',
-            'total' => 'required|numeric',
-            'attachment_file' => 'file|mimes:pdf|max:5120',
+            'attachment_file' => 'array',
+            'attachment_file.*' => 'file|mimes:pdf|max:5120',
             'date' => 'required|date',
             'due_date' => 'required|date',
         ];
+
+        if (request()->puchase_id == 1) {
+            $request['project_id'] = 'required|exists:projects,id';
+        }
+
+        return $request;
     }
 
     public function attributes()

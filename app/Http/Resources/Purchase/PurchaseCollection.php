@@ -33,7 +33,7 @@ class PurchaseCollection extends ResourceCollection
                 "file_attachment" => $this->getDocument($purchase),
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
-                "ppn" => $purchase->ppn ?? 0,
+                "ppn" => $this->getPpn($purchase),
                 "created_at" => $purchase->created_at,
                 "updated_at" => $purchase->updated_at,
             ];
@@ -46,11 +46,7 @@ class PurchaseCollection extends ResourceCollection
             }
 
             if ($purchase->pph) {
-                $data[$key]['tax_pph'] = [
-                    "id" => $purchase->taxPph->id,
-                    "name" => $purchase->taxPph->name,
-                    "percent" => $purchase->taxPph->percent,
-                ];
+                $data[$key]['pph'] = $this->getPph($purchase);
             }
         }
 
@@ -63,15 +59,13 @@ class PurchaseCollection extends ResourceCollection
 
         foreach ($documents->documents as $document) {
             $data[] = [
-                "name" => "$document->purchase->doc_type/$document->doc_no/" . date('Y', strtotime($document->created_at)) . ".pdf"
+                "id" => $document->id,
+                "name" => $document->purchase->doc_type . "/$document->doc_no.$document->id/" . date('Y', strtotime($document->created_at)) . ".pdf",
+                "link" => asset("storage/$document->file_path"),
             ];
         }
 
         return $data;
-        // return [
-        //     "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
-        //     "link" => asset("storage/$purchase->file"),
-        // ];
     }
 
     protected function getStatus($purchase)
@@ -120,5 +114,15 @@ class PurchaseCollection extends ResourceCollection
         }
 
         return $data;
+    }
+
+    protected function getPpn($purchase)
+    {
+        return ($purchase->sub_total * $purchase->ppn) / 100;
+    }
+
+    protected function getPph($purchase)
+    {
+        return (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100;
     }
 }
