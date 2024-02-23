@@ -51,6 +51,7 @@ class Purchase extends Model
         }
 
         if ($this->attributes['pph']) {
+           
             $pph = ($total * $this->taxPph->percent) / 100;
             $total -= $pph;
         }

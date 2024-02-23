@@ -99,7 +99,7 @@ class PurchaseController extends Controller
                 'doc_type' => Str::upper($purchaseCategory->name),
                 'purchase_status_id' => PurchaseStatus::AWAITING,
                 'company_id' => $company->id,
-                'ppn' => $request->tax,
+                'ppn' => $request->tax_ppn,
             ]);
 
             $purchase = Purchase::create($request->all());
@@ -175,7 +175,7 @@ class PurchaseController extends Controller
         }
 
         $request->merge([
-            'ppn' => $request->tax,
+            'ppn' => $request->tax_ppn,
             'company_id' => $company->id,
         ]);
 
@@ -413,5 +413,16 @@ class PurchaseController extends Controller
     protected function getPph($purchase)
     {
         return (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100;
+    }
+    
+    // =======
+    protected function saveDocument($purchase, $file, $iteration)
+    {
+        $document = $file->store(Purchase::ATTACHMENT_FILE);
+        return $purchase->documents()->create([
+            "doc_no" => $purchase->doc_no,
+            "file_name" => $purchase->doc_no . '.' . $iteration,
+            "file_path" => $document
+        ]);
     }
 }

@@ -29,7 +29,7 @@ class CreateRequest extends FormRequest
             'purchase_id' => 'required|in:1,2',
             'purchase_category_id' => 'required|exists:purchase_category,id',
             'client_id' => 'required|exists:companies,id',
-            'tax' => 'required',
+            // 'tax_ppn' => '',
             'sub_total' => 'required|numeric',
             'attachment_file' => 'array',
             'attachment_file.*' => 'file|mimes:pdf|max:5120',
@@ -37,7 +37,7 @@ class CreateRequest extends FormRequest
             'due_date' => 'required|date',
         ];
 
-        if (request()->puchase_id == 1) {
+        if (request()->purchase_id == 1) {
             $request['project_id'] = 'required|exists:projects,id';
         }
 
