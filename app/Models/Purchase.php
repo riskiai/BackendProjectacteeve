@@ -37,11 +37,18 @@ class Purchase extends Model
         'sub_total',
         'ppn',
         'pph',
-        'total',
-        'file',
         'date',
         'due_date',
     ];
+
+    public function getTotalAttribute()
+    {
+        if ($this->attributes['ppn']) {
+            $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
+            return $this->attributes['sub_total'] + $ppn;
+        }
+        return $this->attributes['sub_total'];
+    }
 
     public function purchaseCategory(): HasOne
     {
@@ -71,5 +78,15 @@ class Purchase extends Model
     public function taxPph(): HasOne
     {
         return $this->hasOne(Tax::class, 'id', 'pph');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'doc_no', 'doc_no');
+    }
+
+    public function document()
+    {
+        return $this->morphOne(Document::class, 'documentable');
     }
 }

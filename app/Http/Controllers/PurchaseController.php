@@ -87,11 +87,6 @@ class PurchaseController extends Controller
         $purchase = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
         $purchaseCategory = PurchaseCategory::find($request->purchase_category_id);
 
-        $tax = Tax::find($request->tax_id);
-        if (strtolower($tax->type) != Tax::TAX_PPN) {
-            return MessageActeeve::warning("this tax is not a ppn type");
-        }
-
         $company = Company::find($request->client_id);
         if ($company->contact_type_id != ContactType::VENDOR) {
             return MessageActeeve::warning("this contact is not a vendor type");
@@ -103,11 +98,14 @@ class PurchaseController extends Controller
                 'doc_type' => Str::upper($purchaseCategory->name),
                 'purchase_status_id' => PurchaseStatus::AWAITING,
                 'company_id' => $company->id,
-                'ppn' => $tax->id,
-                'file' => $request->file('attachment_file')->store(Purchase::ATTACHMENT_FILE)
+                'ppn' => $request->tax,
             ]);
 
             $purchase = Purchase::create($request->all());
+
+            foreach ($request->attachment_file as $key => $file) {
+                $this->saveDocument($purchase, $file, $key + 1);
+            }
 
             DB::commit();
             return MessageActeeve::success("doc no $purchase->doc_no has been created");
@@ -153,14 +151,6 @@ class PurchaseController extends Controller
             ];
         }
 
-        if ($purchase->ppn) {
-            $data['tax_ppn'] = [
-                "id" => $purchase->taxPpn->id,
-                "name" => $purchase->taxPpn->name,
-                "percent" => $purchase->taxPpn->percent,
-            ];
-        }
-
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
@@ -182,13 +172,8 @@ class PurchaseController extends Controller
             return MessageActeeve::warning("this contact is not a vendor type");
         }
 
-        $tax = Tax::find($request->tax_id);
-        if (strtolower($tax->type) != Tax::TAX_PPN) {
-            return MessageActeeve::warning("this tax is not a ppn type");
-        }
-
         $request->merge([
-            'ppn' => $tax->id,
+            'ppn' => $request->tax,
             'company_id' => $company->id,
         ]);
 
@@ -382,5 +367,15 @@ class PurchaseController extends Controller
         }
 
         return $data;
+    }
+
+    protected function saveDocument($purchase, $file, $iteration)
+    {
+        $document = $file->store(Purchase::ATTACHMENT_FILE);
+        return $purchase->documents()->create([
+            "doc_no" => $purchase->doc_no,
+            "file_name" => $purchase->doc_no . '.' . $iteration,
+            "file_path" => $document
+        ]);
     }
 }

@@ -65,6 +65,7 @@ class ProjectCollection extends ResourceCollection
         return [
             'status' => $status,
             'percent' => $costEstimate . '%',
+            'real_cost' => $total
         ];
     }
 }

@@ -25,21 +25,25 @@ class PurchaseCollection extends ResourceCollection
                 "doc_type" => $purchase->doc_type,
                 "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "vendor_name" => $purchase->company->name,
-                "project_name" => $purchase->project->name,
                 "status" => $this->getStatus($purchase),
                 "description" => $purchase->description,
                 "remarks" => $purchase->remarks,
                 "sub_total" => $purchase->sub_total,
                 "total" => $purchase->total,
-                "file_attachment" => [
-                    "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
-                    "link" => asset("storage/$purchase->file"),
-                ],
+                "file_attachment" => $this->getDocument($purchase),
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
+                "ppn" => $purchase->ppn ?? 0,
                 "created_at" => $purchase->created_at,
                 "updated_at" => $purchase->updated_at,
             ];
+
+            if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
+                $data[$key]['project'] = [
+                    "id" => $purchase->project->id,
+                    "name" => $purchase->project->name,
+                ];
+            }
 
             if ($purchase->pph) {
                 $data[$key]['tax_pph'] = [
@@ -48,17 +52,26 @@ class PurchaseCollection extends ResourceCollection
                     "percent" => $purchase->taxPph->percent,
                 ];
             }
-
-            if ($purchase->ppn) {
-                $data[$key]['tax_ppn'] = [
-                    "id" => $purchase->taxPpn->id,
-                    "name" => $purchase->taxPpn->name,
-                    "percent" => $purchase->taxPpn->percent,
-                ];
-            }
         }
 
         return $data;
+    }
+
+    protected function getDocument($documents)
+    {
+        $data = [];
+
+        foreach ($documents->documents as $document) {
+            $data[] = [
+                "name" => "$document->purchase->doc_type/$document->doc_no/" . date('Y', strtotime($document->created_at)) . ".pdf"
+            ];
+        }
+
+        return $data;
+        // return [
+        //     "name" => "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . ".pdf",
+        //     "link" => asset("storage/$purchase->file"),
+        // ];
     }
 
     protected function getStatus($purchase)
