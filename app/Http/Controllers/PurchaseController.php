@@ -48,17 +48,32 @@ class PurchaseController extends Controller
             ->where('tab', Purchase::TAB_PAID)
             ->sum(DB::raw('sub_total + ppn'));
     
+        $data = [
+            [
+                'title' => 'VERIFIED',
+                'amount' => $countVerified
+            ],
+            [
+                'title' => 'DUEDATE',
+                'amount' => $countDueDate
+            ],
+            [
+                'title' => 'PAYMENT_REQUEST',
+                'amount' => $countPaymentRequest
+            ],
+            [
+                'title' => 'PAID',
+                'amount' => $countPaid
+            ]
+        ];
+    
         return [
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
-            "data" => [
-                "verified" => $countVerified,
-                "due_date" => $countDueDate,
-                "payment_request" => $countPaymentRequest,
-                "paid" => $countPaid,
-            ]
+            'data' => $data
         ];
     }
+    
     
 
     public function index(Request $request)

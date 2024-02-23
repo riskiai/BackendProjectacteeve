@@ -75,11 +75,29 @@ class ProjectController extends Controller
             $percent = ($project->billing / $project->margin) * 100;
             $percent = round($percent, 2) . "%";
 
+            $data = [
+                [
+                    'title' => 'BILLING',
+                    'amount' => $project->billing
+                ],
+                [
+                    'title' => 'COST_ESTIMATE',
+                    'amount' => $project->cost_estimate
+                ],
+                [
+                    'title' => 'MARGIN',
+                    'amount' => $project->margin
+                ],
+                [
+                    'title' => 'PERCENT',
+                    'amount' => $percent
+                ]
+            ];
+
             return [
-                "billing" => $project->billing,
-                "cost_estimate" => $project->cost_estimate,
-                "margin" => $project->margin,
-                "percent" => $percent,
+                'status' => MessageActeeve::SUCCESS,
+                'status_code' => MessageActeeve::HTTP_OK,
+                'data' => $data
             ];
         }
 
