@@ -41,27 +41,48 @@ class ProjectController extends Controller
         return new ProjectCollection($projects);
     }
 
-    public function counting(Request $request)
-    {
-        $project = Project::select(DB::raw('SUM(billing) as billing, SUM(cost_estimate) as cost_estimate, SUM(margin) as margin'))->first();
+    // public function counting(Request $request)
+    // {
+    //     $project = Project::select(DB::raw('SUM(billing) as billing, SUM(cost_estimate) as cost_estimate, SUM(margin) as margin'))->first();
 
-        $projects = Project::all();
-        $total = 0;
-        foreach ($projects as $project) {
-            $costProgress = $this->costProgress($project);
-            $total += $costProgress['total'];
+    //     $projects = Project::all();
+    //     $total = 0;
+    //     foreach ($projects as $project) {
+    //         $costProgress = $this->costProgress($project);
+    //         $total += $costProgress['total'];
+    //     }
+
+    //     $percent = ($project->billing / $total) * 100;
+    //     $percent = round($percent, 2) . "%";
+
+    //     return [
+    //         "billing" => $project->billing,
+    //         "cost_estimate" => $project->cost_estimate,
+    //         "margin" => $project->margin,
+    //         "percent" => $percent,
+    //     ];
+    // }
+
+    public function counting(Request $request)
+        {
+            $project = Project::select(
+                DB::raw('SUM(billing) as billing'),
+                DB::raw('SUM(cost_estimate) as cost_estimate'),
+                DB::raw('SUM(margin) as margin')
+            )->first();
+
+            // Membuat perhitungan persentase dari total billing ke total margin
+            $percent = ($project->billing / $project->margin) * 100;
+            $percent = round($percent, 2) . "%";
+
+            return [
+                "billing" => $project->billing,
+                "cost_estimate" => $project->cost_estimate,
+                "margin" => $project->margin,
+                "percent" => $percent,
+            ];
         }
 
-        $percent = ($project->billing / $total) * 100;
-        $percent = round($percent, 2) . "%";
-
-        return [
-            "billing" => $project->billing,
-            "cost_estimate" => $project->cost_estimate,
-            "margin" => $project->margin,
-            "percent" => $percent,
-        ];
-    }
 
     public function store(CreateRequest $request)
     {

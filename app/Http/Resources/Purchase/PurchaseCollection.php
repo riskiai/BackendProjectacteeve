@@ -32,8 +32,8 @@ class PurchaseCollection extends ResourceCollection
                 "total" => $purchase->total,
                 "file_attachment" => $this->getDocument($purchase),
                 "date" => $purchase->date,
-                "due_date" => $purchase->due_date,
-                "ppn" => $this->getPpn($purchase),
+                "due_date" => $purchase->due_date, 
+                "ppn" => $this->getPpn($purchase), 
                 "created_at" => $purchase->created_at,
                 "updated_at" => $purchase->updated_at,
             ];

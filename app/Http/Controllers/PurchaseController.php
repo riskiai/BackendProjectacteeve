@@ -34,20 +34,20 @@ class PurchaseController extends Controller
     public function counting(Request $request)
     {
         $purchaseId = $request->purchase_id ?? 1;
-
+    
         $countVerified = Purchase::where('purchase_id', $purchaseId)
             ->where('purchase_status_id', PurchaseStatus::VERIFIED)
-            ->sum('total');
+            ->sum(DB::raw('sub_total + ppn'));
         $countDueDate = Purchase::where('purchase_id', $purchaseId)
             ->where('purchase_status_id', PurchaseStatus::DUEDATE)
-            ->sum('total');
+            ->sum(DB::raw('sub_total + ppn'));
         $countPaymentRequest = Purchase::where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
-            ->sum('total');
+            ->sum(DB::raw('sub_total + ppn'));
         $countPaid = Purchase::where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAID)
-            ->sum('total');
-
+            ->sum(DB::raw('sub_total + ppn'));
+    
         return [
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
@@ -59,6 +59,7 @@ class PurchaseController extends Controller
             ]
         ];
     }
+    
 
     public function index(Request $request)
     {

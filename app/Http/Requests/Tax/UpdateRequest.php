@@ -29,7 +29,7 @@ class UpdateRequest extends FormRequest
             'name' => 'required',
             'description' => 'required',
             'percent' => 'required|numeric',
-            'type' => 'nullable|string',
+            'type' => 'required',
         ];
     }
 
