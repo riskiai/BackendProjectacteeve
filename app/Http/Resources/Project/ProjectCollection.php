@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Project;
 
 use App\Models\Project;
+use App\Models\Purchase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -49,7 +50,9 @@ class ProjectCollection extends ResourceCollection
         $status = Project::STATUS_OPEN;
         $total = 0;
 
-        foreach ($project->purchases as $purchase) {
+        $purchases = $project->purchases()->where('tab', Purchase::TAB_PAID)->get();
+
+        foreach ($purchases as $purchase) {
             $total += $purchase->sub_total;
         }
 
