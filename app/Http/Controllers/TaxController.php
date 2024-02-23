@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Tax\CreateRequest;
 use App\Http\Requests\Tax\UpdateRequest;
 use App\Http\Resources\Tax\TaxCollection;
+use App\Models\Purchase;
 
 class TaxController extends Controller
 {
@@ -60,11 +61,11 @@ class TaxController extends Controller
                 'name' => $tax->name,
                 'description' => $tax->description,
                 'percent' => $tax->percent,
-                'type'=> $tax->type,
+                'type' => $tax->type,
                 'created_at' => $tax->created_at,
                 'updated_at' => $tax->updated_at,
-                ]
-            ]);
+            ]
+        ]);
     }
 
     /**
@@ -111,5 +112,51 @@ class TaxController extends Controller
             DB::rollBack();
             return MessageActeeve::error($th->getMessage());
         }
+    }
+
+    public function reportPpn()
+    {
+        $purchases = Purchase::whereExists(function ($query) {
+            $query->where('ppn', '!=', null);
+        })->get();
+
+        $data = [];
+        foreach ($purchases as $key => $purchase) {
+            $data[$key] = [
+                "doc_no" => $purchase->doc_no,
+                "doc_type" => $purchase->doc_type,
+                "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
+                "vendor_name" => $purchase->company->name,
+                "status" => $this->getStatus($purchase),
+                "description" => $purchase->description,
+                "remarks" => $purchase->remarks,
+                "sub_total" => $purchase->sub_total,
+                "total" => $purchase->total,
+                "file_attachment" => $this->getDocument($purchase),
+                "date" => $purchase->date,
+                "due_date" => $purchase->due_date,
+                "ppn" => $this->getPpn($purchase),
+                "created_at" => $purchase->created_at,
+                "updated_at" => $purchase->updated_at,
+            ];
+
+            if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
+                $data[$key]['project'] = [
+                    "id" => $purchase->project->id,
+                    "name" => $purchase->project->name,
+                ];
+            }
+        }
+
+        return MessageActeeve::render([
+            'status' => MessageActeeve::SUCCESS,
+            'status_code' => MessageActeeve::HTTP_OK,
+            'data' => $data
+        ]);
+    }
+
+    protected function getPpn($purchase)
+    {
+        return ($purchase->sub_total * $purchase->ppn) / 100;
     }
 }
