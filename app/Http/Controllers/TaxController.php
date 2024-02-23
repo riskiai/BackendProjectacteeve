@@ -127,7 +127,6 @@ class TaxController extends Controller
                 "doc_type" => $purchase->doc_type,
                 "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "vendor_name" => $purchase->company->name,
-                "status" => $this->getStatus($purchase),
                 "description" => $purchase->description,
                 "remarks" => $purchase->remarks,
                 "sub_total" => $purchase->sub_total,
