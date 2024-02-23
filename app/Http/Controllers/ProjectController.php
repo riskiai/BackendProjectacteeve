@@ -81,7 +81,7 @@ class ProjectController extends Controller
                     'amount' => $project->billing
                 ],
                 [
-                    'title' => 'COST_ESTIMATE',
+                    'title' => 'COST ESTIMATE',
                     'amount' => $project->cost_estimate
                 ],
                 [

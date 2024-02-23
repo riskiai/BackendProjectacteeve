@@ -54,11 +54,11 @@ class PurchaseController extends Controller
                 'amount' => $countVerified
             ],
             [
-                'title' => 'DUEDATE',
+                'title' => 'DUE DATE',
                 'amount' => $countDueDate
             ],
             [
-                'title' => 'PAYMENT_REQUEST',
+                'title' => 'PAYMENT REQUEST',
                 'amount' => $countPaymentRequest
             ],
             [
