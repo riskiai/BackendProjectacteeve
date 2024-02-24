@@ -31,10 +31,53 @@ use Illuminate\Support\Facades\Storage;
 
 class PurchaseController extends Controller
 {
-    public function counting(Request $request)
+    // public function counting(Request $request)
+    // {
+    //     $purchaseId = $request->purchase_id ?? 1;
+    
+    //     $countVerified = Purchase::where('purchase_id', $purchaseId)
+    //         ->where('purchase_status_id', PurchaseStatus::VERIFIED)
+    //         ->sum(DB::raw('sub_total + ppn'));
+    //     $countDueDate = Purchase::where('purchase_id', $purchaseId)
+    //         ->where('purchase_status_id', PurchaseStatus::DUEDATE)
+    //         ->sum(DB::raw('sub_total + ppn'));
+    //     $countPaymentRequest = Purchase::where('purchase_id', $purchaseId)
+    //         ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
+    //         ->sum(DB::raw('sub_total + ppn'));
+    //     $countPaid = Purchase::where('purchase_id', $purchaseId)
+    //         ->where('tab', Purchase::TAB_PAID)
+    //         ->sum(DB::raw('sub_total + ppn'));
+    
+    //     $data = [
+    //         [
+    //             'title' => 'VERIFIED',
+    //             'amount' => $countVerified
+    //         ],
+    //         [
+    //             'title' => 'DUE DATE',
+    //             'amount' => $countDueDate
+    //         ],
+    //         [
+    //             'title' => 'PAYMENT REQUEST',
+    //             'amount' => $countPaymentRequest
+    //         ],
+    //         [
+    //             'title' => 'PAID',
+    //             'amount' => $countPaid
+    //         ]
+    //     ];
+    
+    //     return [
+    //         'status' => MessageActeeve::SUCCESS,
+    //         'status_code' => MessageActeeve::HTTP_OK,
+    //         'data' => $data
+    //     ];
+    // }
+
+        public function counting(Request $request)
     {
         $purchaseId = $request->purchase_id ?? 1;
-    
+
         $countVerified = Purchase::where('purchase_id', $purchaseId)
             ->where('purchase_status_id', PurchaseStatus::VERIFIED)
             ->sum(DB::raw('sub_total + ppn'));
@@ -47,32 +90,19 @@ class PurchaseController extends Controller
         $countPaid = Purchase::where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAID)
             ->sum(DB::raw('sub_total + ppn'));
-    
-        $data = [
-            [
-                'title' => 'VERIFIED',
-                'amount' => $countVerified
-            ],
-            [
-                'title' => 'DUE DATE',
-                'amount' => $countDueDate
-            ],
-            [
-                'title' => 'PAYMENT REQUEST',
-                'amount' => $countPaymentRequest
-            ],
-            [
-                'title' => 'PAID',
-                'amount' => $countPaid
-            ]
-        ];
-    
+
         return [
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
-            'data' => $data
+            "data" => [
+                "verified" => $countVerified,
+                "due_date" => $countDueDate,
+                "payment_request" => $countPaymentRequest,
+                "paid" => $countPaid,
+            ]
         ];
     }
+
     
     
 
