@@ -81,6 +81,12 @@ class PurchaseController extends Controller
         $countVerified = Purchase::where('purchase_id', $purchaseId)
             ->where('purchase_status_id', PurchaseStatus::VERIFIED)
             ->sum(DB::raw('sub_total + ppn'));
+        $countOverdue = Purchase::where('purchase_id', $purchaseId)
+            ->where('purchase_status_id', PurchaseStatus::OVERDUE)
+            ->sum(DB::raw('sub_total + ppn'));
+        $countOpen = Purchase::where('purchase_id', $purchaseId)
+            ->where('purchase_status_id', PurchaseStatus::OPEN)
+            ->sum(DB::raw('sub_total + ppn'));
         $countDueDate = Purchase::where('purchase_id', $purchaseId)
             ->where('purchase_status_id', PurchaseStatus::DUEDATE)
             ->sum(DB::raw('sub_total + ppn'));
@@ -96,6 +102,8 @@ class PurchaseController extends Controller
             'status_code' => MessageActeeve::HTTP_OK,
             "data" => [
                 "verified" => $countVerified,
+                "Over Due" => $countOverdue,
+                "Open" => $countOpen,
                 "due_date" => $countDueDate,
                 "payment_request" => $countPaymentRequest,
                 "paid" => $countPaid,
@@ -104,8 +112,6 @@ class PurchaseController extends Controller
     }
 
     
-    
-
     public function index(Request $request)
     {
         $query = Purchase::query();

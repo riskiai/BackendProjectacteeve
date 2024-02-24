@@ -50,7 +50,7 @@ class ProjectController extends Controller
         )->first();
     
         // Membuat perhitungan persentase dari total billing ke total margin
-        $percent = ($project->billing / $project->margin) * 100;
+        $percent = ($project->margin / $project->billing) * 100;
         $percent = round($percent, 2) . "%";
     
         return [
