@@ -41,23 +41,46 @@ class Purchase extends Model
         'due_date',
     ];
 
+    public function taxPph(): HasOne
+    {
+        return $this->hasOne(Tax::class, 'id', 'pph');
+    }
+
+    // public function getTotalAttribute()
+    // {
+    //     $total = 0;
+
+    //     if ($this->attributes['ppn']) {
+    //         $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
+    //         $total = $this->attributes['sub_total'] + $ppn;
+    //     }
+
+    //     if ($this->attributes['pph']) {
+           
+    //         $pph = ($total * $this->taxPph->percent) / 100;
+    //         $total -= $pph;
+    //     }
+
+    //     return $total;
+    // }
+
     public function getTotalAttribute()
     {
-        $total = 0;
+    $total = 0;
 
-        if ($this->attributes['ppn']) {
-            $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
-            $total = $this->attributes['sub_total'] + $ppn;
-        }
-
-        if ($this->attributes['pph']) {
-           
-            $pph = ($total * $this->taxPph->percent) / 100;
-            $total -= $pph;
-        }
-
-        return $total;
+    if ($this->attributes['ppn']) {
+        $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
+        $total = $this->attributes['sub_total'] + $ppn;
     }
+
+    if ($this->attributes['pph']) {
+        $pph = ($total * $this->taxPph->first()->percent) / 100;
+        $total -= $pph;
+    }
+
+    return $total;
+    }
+
 
     public function purchaseCategory(): HasOne
     {
@@ -82,11 +105,6 @@ class Purchase extends Model
     public function taxPpn(): HasOne
     {
         return $this->hasOne(Tax::class, 'id', 'ppn');
-    }
-
-    public function taxPph(): HasOne
-    {
-        return $this->hasOne(Tax::class, 'id', 'pph');
     }
 
     public function documents()
