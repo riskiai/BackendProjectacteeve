@@ -102,8 +102,8 @@ class PurchaseController extends Controller
             'status_code' => MessageActeeve::HTTP_OK,
             "data" => [
                 "verified" => $countVerified,
-                "Over Due" => $countOverdue,
-                "Open" => $countOpen,
+                "over_due" => $countOverdue,
+                "open" => $countOpen,
                 "due_date" => $countDueDate,
                 "payment_request" => $countPaymentRequest,
                 "paid" => $countPaid,
