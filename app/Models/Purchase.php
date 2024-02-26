@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Purchase extends Model
@@ -48,15 +49,15 @@ class Purchase extends Model
 
     public function getTotalAttribute()
     {
-        $total = 0;
+        $total = $this->attributes['sub_total'];
 
         if ($this->attributes['ppn']) {
             $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
-            $total = $this->attributes['sub_total'] + $ppn;
+            $total += $ppn;
         }
 
         if ($this->attributes['pph']) {
-           
+
             $pph = ($total * $this->taxPph->percent) / 100;
             $total -= $pph;
         }
@@ -115,5 +116,10 @@ class Purchase extends Model
     public function document()
     {
         return $this->morphOne(Document::class, 'documentable');
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(LogPurchase::class, 'doc_no', 'doc_no');
     }
 }

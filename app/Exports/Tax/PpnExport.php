@@ -13,7 +13,7 @@ class PpnExport implements FromView
 {
     public function view(): View
     {
-        $purchases = Purchase::whereHas('taxPpn')->get();
+        $purchases = Purchase::where('ppn', '!=', null)->get();
 
         return view('report.tax.ppn', [
             'purchases' => $purchases

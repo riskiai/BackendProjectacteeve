@@ -22,33 +22,21 @@
                 {{-- <td>{{ $purchase->taxPpn ? $purchase->sub_total / $purchase->taxPpn->percent : '-' }}</td>
                 <td>{{ $purchase->taxPph ? $purchase->sub_total / $purchase->taxPph->percent : '-' }}</td> --}}
                 <td>
-                    @if ($purchase->taxPpn && is_numeric($purchase->taxPpn->percent))
-                        {{ $purchase->sub_total / $purchase->taxPpn->percent }}
-                    @else
-                        -
-                    @endif
+                    {{ ($purchase->sub_total * $purchase->ppn) / 100 }}
                 </td>
-                
+
                 <td>
-                    @if ($purchase->taxPph && is_numeric($purchase->taxPph->percent))
-                        {{ $purchase->sub_total / $purchase->taxPph->percent }}
-                    @else
-                        -
-                    @endif
+                    {{ $purchase->taxPph ? $purchase->taxPph->percent : 0 }}
                 </td>
-                
+
                 {{-- <td>
                     {{ $purchase->taxPpn && $purchase->taxPph ? $purchase->sub_total / $purchase->taxPpn->percent + $purchase->sub_total / $purchase->taxPph->percent : $purchase->total }}
                 </td> --}}
 
                 <td>
-                    @if ($purchase->taxPpn && is_numeric($purchase->taxPpn->percent) && $purchase->taxPph && is_numeric($purchase->taxPph->percent))
-                        {{ ($purchase->sub_total / $purchase->taxPpn->percent) + ($purchase->sub_total / $purchase->taxPph->percent) }}
-                    @else
-                        {{ $purchase->total }}
-                    @endif
+                    {{ $purchase->total }}
                 </td>
-                
+
             </tr>
         @endforeach
     </tbody>

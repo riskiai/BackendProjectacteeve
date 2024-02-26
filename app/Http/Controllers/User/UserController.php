@@ -4,10 +4,12 @@ namespace App\Http\Controllers\User;
 
 use App\Facades\MessageActeeve;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UpdatePasswordRequest;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -18,6 +20,25 @@ class UserController extends Controller
         $users = $query->paginate($request->per_page);
 
         return new UserCollection($users);
+    }
+
+    public function updatePassword(UpdatePasswordRequest $request)
+    {
+        DB::beginTransaction();
+
+        $user = User::findOrFail(auth()->user()->id);
+
+        try {
+            $user->update([
+                "password" => Hash::make($request->new_password)
+            ]);
+
+            DB::commit();
+            return MessageActeeve::success("user $user->name has been updated");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
     }
 
     public function destroy(string $id)

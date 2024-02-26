@@ -18,17 +18,15 @@
                 <td>{{ $purchase->sub_total }}</td>
                 {{-- <td>{{ $purchase->taxPpn ? $purchase->sub_total / $purchase->taxPpn->percent : '-' }}</td> --}}
                 <td>
-                    @if ($purchase->taxPpn && is_numeric($purchase->taxPpn->percent))
-                        {{ $purchase->sub_total / $purchase->taxPpn->percent }}
-                    @else
-                        -
-                    @endif
+                    {{ ($purchase->sub_total * $purchase->ppn) / 100 }}
                 </td>
-                
+
                 <td>
-                    <a href="{{ asset("storage/$purchase->file") }}">
-                        {{ "$purchase->doc_type/$purchase->doc_no/" . date('Y', strtotime($purchase->created_at)) . '.pdf' }}
-                    </a>
+                    @foreach ($purchase->documents as $key => $document)
+                        <a href="{{ asset("storage/$document->file_path") }}">
+                            {{ "$purchase->doc_type/$purchase->doc_no.$document->id/" . date('Y', strtotime($purchase->created_at)) . '.pdf' }}
+                        </a>
+                    @endforeach
                 </td>
             </tr>
         @endforeach

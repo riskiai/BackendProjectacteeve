@@ -34,7 +34,7 @@ class PurchaseController extends Controller
     // public function counting(Request $request)
     // {
     //     $purchaseId = $request->purchase_id ?? 1;
-    
+
     //     $countVerified = Purchase::where('purchase_id', $purchaseId)
     //         ->where('purchase_status_id', PurchaseStatus::VERIFIED)
     //         ->sum(DB::raw('sub_total + ppn'));
@@ -47,7 +47,7 @@ class PurchaseController extends Controller
     //     $countPaid = Purchase::where('purchase_id', $purchaseId)
     //         ->where('tab', Purchase::TAB_PAID)
     //         ->sum(DB::raw('sub_total + ppn'));
-    
+
     //     $data = [
     //         [
     //             'title' => 'VERIFIED',
@@ -66,7 +66,7 @@ class PurchaseController extends Controller
     //             'amount' => $countPaid
     //         ]
     //     ];
-    
+
     //     return [
     //         'status' => MessageActeeve::SUCCESS,
     //         'status_code' => MessageActeeve::HTTP_OK,
@@ -74,28 +74,117 @@ class PurchaseController extends Controller
     //     ];
     // }
 
-        public function counting(Request $request)
+    public function counting(Request $request)
     {
         $purchaseId = $request->purchase_id ?? 1;
 
-        $countVerified = Purchase::where('purchase_id', $purchaseId)
-            ->where('purchase_status_id', PurchaseStatus::VERIFIED)
-            ->sum(DB::raw('sub_total + ppn'));
-        $countOverdue = Purchase::where('purchase_id', $purchaseId)
-            ->where('purchase_status_id', PurchaseStatus::OVERDUE)
-            ->sum(DB::raw('sub_total + ppn'));
-        $countOpen = Purchase::where('purchase_id', $purchaseId)
-            ->where('purchase_status_id', PurchaseStatus::OPEN)
-            ->sum(DB::raw('sub_total + ppn'));
-        $countDueDate = Purchase::where('purchase_id', $purchaseId)
-            ->where('purchase_status_id', PurchaseStatus::DUEDATE)
-            ->sum(DB::raw('sub_total + ppn'));
-        $countPaymentRequest = Purchase::where('purchase_id', $purchaseId)
+        $countVerified = Purchase::selectRaw("SUM(sub_total + (sub_total * ppn) / 100) as result")
+            ->where('purchase_id', $purchaseId)
+            ->where('tab', Purchase::TAB_SUBMIT)
+            ->first()->result;
+
+        $countOverdue = 0;
+        $purchaseOverdue = Purchase::where('purchase_id', $purchaseId)
+            ->whereDate('due_date', '>=', Carbon::now())
+            ->where('tab', Purchase::TAB_VERIFIED)
+            ->get();
+        foreach ($purchaseOverdue as $purchase) {
+            $total = $purchase->sub_total;
+
+            if ($purchase->ppn) {
+                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
+                $total += $ppn;
+            }
+
+            if ($purchase->taxPph) {
+                $pph = ($total * $purchase->taxPph->percent) / 100;
+                $total -= $pph;
+            }
+
+            $countOverdue += $total;
+        }
+
+        $countOpen = 0;
+        $purchaseOpen = Purchase::where('purchase_id', $purchaseId)
+            ->whereDate('due_date', '<', Carbon::now())
+            ->where('tab', Purchase::TAB_VERIFIED)
+            ->get();
+        foreach ($purchaseOpen as $purchase) {
+            $total = $purchase->sub_total;
+
+            if ($purchase->ppn) {
+                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
+                $total += $ppn;
+            }
+
+            if ($purchase->taxPph) {
+                $pph = ($total * $purchase->taxPph->percent) / 100;
+                $total -= $pph;
+            }
+
+            $countOpen += $total;
+        }
+
+        $countDueDate = 0;
+        $purchaseDueDate = Purchase::where('purchase_id', $purchaseId)
+            ->whereDate('due_date',  Carbon::now())
+            ->where('tab', Purchase::TAB_VERIFIED)
+            ->get();
+        foreach ($purchaseDueDate as $purchase) {
+            $total = $purchase->sub_total;
+
+            if ($purchase->ppn) {
+                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
+                $total += $ppn;
+            }
+
+            if ($purchase->taxPph) {
+                $pph = ($total * $purchase->taxPph->percent) / 100;
+                $total -= $pph;
+            }
+
+            $countDueDate += $total;
+        }
+
+        $countPaymentRequest = 0;
+        $purchaseDueDate = Purchase::where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
-            ->sum(DB::raw('sub_total + ppn'));
-        $countPaid = Purchase::where('purchase_id', $purchaseId)
+            ->get();
+        foreach ($purchaseDueDate as $purchase) {
+            $total = $purchase->sub_total;
+
+            if ($purchase->ppn) {
+                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
+                $total += $ppn;
+            }
+
+            if ($purchase->taxPph) {
+                $pph = ($total * $purchase->taxPph->percent) / 100;
+                $total -= $pph;
+            }
+
+            $countPaymentRequest += $total;
+        }
+
+        $countPaid = 0;
+        $purchaseDueDate = Purchase::where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAID)
-            ->sum(DB::raw('sub_total + ppn'));
+            ->get();
+        foreach ($purchaseDueDate as $purchase) {
+            $total = $purchase->sub_total;
+
+            if ($purchase->ppn) {
+                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
+                $total += $ppn;
+            }
+
+            if ($purchase->taxPph) {
+                $pph = ($total * $purchase->taxPph->percent) / 100;
+                $total -= $pph;
+            }
+
+            $countPaid += $total;
+        }
 
         return [
             'status' => MessageActeeve::SUCCESS,
@@ -111,7 +200,7 @@ class PurchaseController extends Controller
         ];
     }
 
-    
+
     public function index(Request $request)
     {
         $query = Purchase::query();
@@ -155,7 +244,6 @@ class PurchaseController extends Controller
             ]);
 
             $purchase = Purchase::create($request->all());
-
             foreach ($request->attachment_file as $key => $file) {
                 $this->saveDocument($purchase, $file, $key + 1);
             }
@@ -181,7 +269,7 @@ class PurchaseController extends Controller
                 "doc_type" => $purchase->doc_type,
                 "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "vendor_name" => [
-                    "id" =>$purchase->company->id,
+                    "id" => $purchase->company->id,
                     "name" => $purchase->company->name,
                     "bank" => $purchase->company->bank_name,
                     "account_name" => $purchase->company->account_name,
@@ -196,6 +284,7 @@ class PurchaseController extends Controller
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
                 "ppn" => $this->getPpn($purchase),
+                "log" => $purchase->logs()->select('name', 'created_at')->latest()->first(),
                 "created_at" => $purchase->created_at,
                 "updated_at" => $purchase->updated_at,
             ];
@@ -295,6 +384,13 @@ class PurchaseController extends Controller
         ]);
 
         try {
+            $purchase->logs()->updateOrCreate([
+                'tab' => Purchase::TAB_VERIFIED,
+                'name' => auth()->user()->name
+            ], [
+                'name' => auth()->user()->name
+            ]);
+
             Purchase::whereDocNo($docNo)->update($request->except('pph_id'));
 
             DB::commit();
@@ -315,6 +411,13 @@ class PurchaseController extends Controller
         }
 
         try {
+            $purchase->logs()->updateOrCreate([
+                'tab' => Purchase::TAB_SUBMIT,
+                'name' => auth()->user()->name
+            ], [
+                'name' => auth()->user()->name
+            ]);
+
             Purchase::whereDocNo($docNo)->update([
                 'purchase_status_id' => PurchaseStatus::REJECTED,
             ]);
@@ -337,6 +440,13 @@ class PurchaseController extends Controller
         }
 
         try {
+            $purchase->logs()->updateOrCreate([
+                'tab' => Purchase::TAB_PAYMENT_REQUEST,
+                'name' => auth()->user()->name
+            ], [
+                'name' => auth()->user()->name
+            ]);
+
             Purchase::whereDocNo($docNo)->update([
                 'tab' => Purchase::TAB_PAYMENT_REQUEST,
             ]);
@@ -359,6 +469,13 @@ class PurchaseController extends Controller
         }
 
         try {
+            $purchase->logs()->updateOrCreate([
+                'tab' => Purchase::TAB_PAID,
+                'name' => auth()->user()->name
+            ], [
+                'name' => auth()->user()->name
+            ]);
+
             Purchase::whereDocNo($docNo)->update([
                 'purchase_status_id' => PurchaseStatus::PAID,
                 'tab' => Purchase::TAB_PAID,
@@ -476,7 +593,7 @@ class PurchaseController extends Controller
             "pph_hasil" => (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100
         ];
     }
-    
+
     // =======
     protected function saveDocument($purchase, $file, $iteration)
     {
