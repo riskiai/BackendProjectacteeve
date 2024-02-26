@@ -78,6 +78,9 @@ class PurchaseController extends Controller
     {
         $purchaseId = $request->purchase_id ?? 1;
 
+        $countRecieved = Purchase::where('purchase_id', $purchaseId)
+            ->count();
+
         $countVerified = Purchase::selectRaw("SUM(sub_total + (sub_total * ppn) / 100) as result")
             ->where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_SUBMIT)
@@ -190,6 +193,7 @@ class PurchaseController extends Controller
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
             "data" => [
+                "recieved" => $countRecieved,
                 "verified" => $countVerified,
                 "over_due" => $countOverdue,
                 "open" => $countOpen,
