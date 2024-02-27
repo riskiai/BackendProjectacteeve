@@ -9,6 +9,7 @@ use App\Facades\Filters\Purchase\ByStatus;
 use App\Facades\Filters\Purchase\ByTab;
 use App\Facades\Filters\Purchase\ByTax;
 use App\Facades\Filters\Purchase\ByVendor;
+use App\Facades\Filters\Purchase\BySearch;
 use App\Facades\MessageActeeve;
 use App\Http\Requests\Purchase\AcceptRequest;
 use App\Http\Requests\Purchase\CreateRequest;
@@ -218,7 +219,8 @@ class PurchaseController extends Controller
                 ByStatus::class,
                 ByVendor::class,
                 ByProject::class,
-                ByTax::class
+                ByTax::class,
+                BySearch::class
             ])
             ->thenReturn()
             ->paginate($request->per_page);
