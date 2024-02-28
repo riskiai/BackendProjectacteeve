@@ -584,6 +584,10 @@ class PurchaseController extends Controller
             ];
         }
 
+        if ($purchase->purchase_status_id == PurchaseStatus::REJECTED) {
+            $data["note"] = $purchase->reject_note;
+        }
+
         if ($purchase->tab == Purchase::TAB_PAID) {
             $data = [
                 "id" => $purchase->purchaseStatus->id,
