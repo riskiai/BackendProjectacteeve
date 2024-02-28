@@ -407,7 +407,7 @@ class PurchaseController extends Controller
         }
     }
 
-    public function reject($docNo)
+    public function reject($docNo, Request $request)
     {
         DB::beginTransaction();
 
@@ -426,6 +426,7 @@ class PurchaseController extends Controller
 
             Purchase::whereDocNo($docNo)->update([
                 'purchase_status_id' => PurchaseStatus::REJECTED,
+                'reject_note' => $request->note
             ]);
 
             DB::commit();
@@ -489,6 +490,39 @@ class PurchaseController extends Controller
 
             DB::commit();
             return MessageActeeve::success("purchase $docNo payment successfully");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
+    }
+
+    public function undo($docNo)
+    {
+        DB::beginTransaction();
+
+        $purchase = Purchase::whereDocNo($docNo)->first();
+        if (!$purchase) {
+            return MessageActeeve::notFound('data not found!');
+        }
+
+        if ($purchase->tab == 1) {
+            return MessageActeeve::warning("cannot undo because tab is submit");
+        }
+
+        try {
+            $purchase->logs()->updateOrCreate([
+                'tab' => $purchase->tab - 1,
+                'name' => auth()->user()->name
+            ], [
+                'name' => auth()->user()->name
+            ]);
+
+            $purchase->update([
+                'tab' => $purchase->tab - 1,
+            ]);
+
+            DB::commit();
+            return MessageActeeve::success("purchase $docNo undo successfully");
         } catch (\Throwable $th) {
             DB::rollBack();
             return MessageActeeve::error($th->getMessage());

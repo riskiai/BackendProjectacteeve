@@ -25,7 +25,7 @@ class PurchaseCollection extends ResourceCollection
                 "doc_type" => $purchase->doc_type,
                 "purchase_type" => $purchase->purchase_id == Purchase::TYPE_EVENT ? Purchase::TEXT_EVENT : Purchase::TEXT_OPERATIONAL,
                 "vendor_name" => [
-                    "id" =>$purchase->company->id,
+                    "id" => $purchase->company->id,
                     "name" => $purchase->company->name,
                     "bank" => $purchase->company->bank_name,
                     "account_name" => $purchase->company->account_name,
@@ -38,8 +38,8 @@ class PurchaseCollection extends ResourceCollection
                 "total" => $purchase->total,
                 "file_attachment" => $this->getDocument($purchase),
                 "date" => $purchase->date,
-                "due_date" => $purchase->due_date, 
-                "ppn" => $this->getPpn($purchase), 
+                "due_date" => $purchase->due_date,
+                "ppn" => $this->getPpn($purchase),
                 "created_at" => $purchase->created_at,
                 "updated_at" => $purchase->updated_at,
             ];
@@ -83,6 +83,10 @@ class PurchaseCollection extends ResourceCollection
                 "id" => $purchase->purchaseStatus->id,
                 "name" => $purchase->purchaseStatus->name,
             ];
+
+            if ($purchase->purchase_status_id == PurchaseStatus::REJECTED) {
+                $data["note"] = $purchase->reject_note;
+            }
         }
 
         if ($purchase->tab == Purchase::TAB_PAID) {
