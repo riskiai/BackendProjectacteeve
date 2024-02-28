@@ -44,6 +44,13 @@ class PurchaseCollection extends ResourceCollection
                 "updated_at" => $purchase->updated_at,
             ];
 
+            if ($purchase->user) {
+                $data[$key]['created_by'] = [
+                    "id" => $purchase->user->id,
+                    "name" => $purchase->user->name,
+                ];
+            }
+
             if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
                 $data[$key]['project'] = [
                     "id" => $purchase->project->id,

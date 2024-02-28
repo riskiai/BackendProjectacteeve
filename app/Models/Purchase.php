@@ -41,7 +41,7 @@ class Purchase extends Model
         'date',
         'due_date',
         'reject_note',
-        'user_id',
+        'created_by',
     ];
 
     public function taxPph(): HasOne
@@ -123,5 +123,10 @@ class Purchase extends Model
     public function logs(): HasMany
     {
         return $this->hasMany(LogPurchase::class, 'doc_no', 'doc_no');
+    }
+
+    public function user(): HasOne
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 }
