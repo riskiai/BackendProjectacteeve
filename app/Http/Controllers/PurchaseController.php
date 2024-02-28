@@ -517,7 +517,7 @@ class PurchaseController extends Controller
                 'name' => auth()->user()->name
             ]);
 
-            $purchase->update([
+            Purchase::whereDocNo($docNo)->update([
                 'tab' => $purchase->tab - 1,
             ]);
 
