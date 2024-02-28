@@ -52,10 +52,12 @@ class PurchaseCollection extends ResourceCollection
             }
 
             if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
-                $data[$key]['project'] = [
-                    "id" => $purchase->project->id,
-                    "name" => $purchase->project->name,
-                ];
+                if ($purchase->project) {
+                    $data[$key]['project'] = [
+                        "id" => $purchase->project->id,
+                        "name" => $purchase->project->name,
+                    ];
+                }
             }
 
             if ($purchase->pph) {
