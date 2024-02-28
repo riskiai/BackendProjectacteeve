@@ -247,6 +247,7 @@ class PurchaseController extends Controller
                 'purchase_status_id' => PurchaseStatus::AWAITING,
                 'company_id' => $company->id,
                 'ppn' => $request->tax_ppn,
+                'created_by' => auth()->user()->id
             ]);
 
             $purchase = Purchase::create($request->all());

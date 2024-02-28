@@ -40,6 +40,8 @@ class Purchase extends Model
         'pph',
         'date',
         'due_date',
+        'reject_note',
+        'user_id',
     ];
 
     public function taxPph(): HasOne

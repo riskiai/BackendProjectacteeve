@@ -2,6 +2,7 @@
 
 namespace App\Facades\Filters\Purchase;
 
+use App\Models\Role;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -9,6 +10,10 @@ class ByPurchaseID
 {
     public function handle(Builder $query, Closure $next)
     {
+        if (auth()->user()->role_id == Role::USER) {
+            $query->where('created_by', auth()->user()->id);
+        }
+
         if (!request()->has('purchase_id')) {
             return $next($query);
         }
