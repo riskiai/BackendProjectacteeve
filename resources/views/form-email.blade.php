@@ -25,6 +25,7 @@
             <p ><strong>Password : 1234567</strong></p>
             <p><strong>Terimakasih <br> Sudah mengguanakan layanan kami. <br> <br>
             <h3 >Hormat Kami <br><br> PT ACTEEVE</h3>
+            <p>Verifikasi Email</p>
             {{-- <p><strong>Name:</strong> {{ $mailData['name'] }}</p>
             <p><strong>Email:</strong> {{ $mailData['email'] }}</p>
             <p><strong>Phone:</strong> {{ $mailData['phone'] }}</p>

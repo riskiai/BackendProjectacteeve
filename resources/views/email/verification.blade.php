@@ -28,6 +28,7 @@
             <p><strong>Password : {{ $user->passwordRecovery }}</strong></p>
             <p><Strong>Link Website : </Strong> <a href="https://acteeveallthingsfinance.id/login" style="text-decoration: none; font-size:13px; font-weight:bold; color:blue;">acteeveallthingsfinance.id</a></p>
             <p><strong>Terimakasih <br> Sudah mengguanakan layanan kami. <br> <br>
+                
                     <h3>Hormat Kami <br><br> PT ACTEEVE INDONESIA</h3>
                     
         </section>
