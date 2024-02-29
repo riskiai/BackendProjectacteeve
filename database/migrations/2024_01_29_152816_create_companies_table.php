@@ -22,12 +22,12 @@ return new class extends Migration
             $table->string('phone');
             $table->string('email');
             $table->string('file');
-            $table->string('bank_name')->nullable();;
-            $table->string('branch')->nullable();;
-            $table->string('account_name')->nullable();;
-            $table->string('currency')->nullable();;
-            $table->string('account_number')->nullable();;
-            $table->string('swift_code')->nullable();;
+            $table->string('bank_name')->nullable();
+            $table->string('branch')->nullable();
+            $table->string('account_name')->nullable();
+            $table->string('currency')->nullable();
+            $table->string('account_number')->nullable();
+            $table->string('swift_code')->nullable();
             $table->timestamps();
         });
     }
