@@ -28,7 +28,7 @@ class CreateRequest extends FormRequest
         return [
             'client_id' => 'required|exists:companies,id',
             'date' => 'required|date',
-            'name' => 'required',
+            'name' => 'required|unique:projects,name',
             'billing' => 'required|numeric',
             'margin' => 'required|numeric',
             'cost_estimate' => 'required|numeric',

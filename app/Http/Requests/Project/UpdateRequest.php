@@ -6,6 +6,7 @@ use App\Facades\MessageActeeve;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdateRequest extends FormRequest
@@ -28,7 +29,7 @@ class UpdateRequest extends FormRequest
         return [
             'client_id' => 'required|exists:companies,id',
             'date' => 'required|date',
-            'name' => 'required',
+            'name' => ['required', Rule::unique('projects')->ignore(request('id'))],
             'billing' => 'required|numeric',
             'margin' => 'required|numeric',
             'cost_estimate' => 'required|numeric',
