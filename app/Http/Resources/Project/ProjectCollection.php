@@ -37,9 +37,33 @@ class ProjectCollection extends ResourceCollection
                     'link' => asset("storage/$project->file")
                 ],
                 'cost_progress' => $this->costProgress($project),
-                'status' => $project->status,
+                'status' => $this->getStatus($project->status),
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
+            ];
+        }
+
+        return $data;
+    }
+
+    protected function getStatus($status)
+    {
+        $data = [
+            "id" => $status,
+            "name" => "Pending"
+        ];
+
+        if ($status == Project::ACTIVE) {
+            return [
+                "id" => $status,
+                "name" => "Active"
+            ];
+        }
+
+        if ($status == Project::REJECTED) {
+            return [
+                "id" => $status,
+                "name" => "Rejected"
             ];
         }
 

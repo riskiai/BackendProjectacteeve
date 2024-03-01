@@ -158,7 +158,7 @@ class ProjectController extends Controller
                     'link' => asset("storage/$project->file")
                 ],
                 'cost_progress' => $this->costProgress($project),
-                'status' => $project->status,
+                'status' => $this->getStatus($project->status),
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
             ]
@@ -288,6 +288,30 @@ class ProjectController extends Controller
             DB::rollBack();
             return MessageActeeve::error($th->getMessage());
         }
+    }
+
+    protected function getStatus($status)
+    {
+        $data = [
+            "id" => $status,
+            "name" => "Pending"
+        ];
+
+        if ($status == Project::ACTIVE) {
+            return [
+                "id" => $status,
+                "name" => "Active"
+            ];
+        }
+
+        if ($status == Project::REJECTED) {
+            return [
+                "id" => $status,
+                "name" => "Rejected"
+            ];
+        }
+
+        return $data;
     }
 
     protected function costProgress($project)

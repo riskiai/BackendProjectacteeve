@@ -2,6 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\Filters\Purchase\ByDate;
+use App\Facades\Filters\Purchase\ByProject;
+use App\Facades\Filters\Purchase\ByPurchaseID;
+use App\Facades\Filters\Purchase\BySearch;
+use App\Facades\Filters\Purchase\ByStatus;
+use App\Facades\Filters\Purchase\ByTab;
+use App\Facades\Filters\Purchase\ByTax;
+use App\Facades\Filters\Purchase\ByVendor;
+use App\Facades\Filters\Purchase\InTaxReport;
 use App\Models\Tax;
 use Illuminate\Http\Request;
 use App\Facades\MessageActeeve;
@@ -13,6 +22,7 @@ use App\Http\Resources\Tax\TaxCollection;
 use App\Models\Purchase;
 use App\Models\PurchaseStatus;
 use Carbon\Carbon;
+use Illuminate\Pipeline\Pipeline;
 
 class TaxController extends Controller
 {
@@ -117,11 +127,25 @@ class TaxController extends Controller
         }
     }
 
-    public function reportPpn()
+    public function reportPpn(Request $request)
     {
-        $purchases = Purchase::whereExists(function ($query) {
-            $query->where('ppn', '!=', null);
-        })->paginate();
+        $query = Purchase::query();
+
+        $purchases = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                InTaxReport::class,
+                ByPurchaseID::class,
+                ByTab::class,
+                ByDate::class,
+                ByStatus::class,
+                ByVendor::class,
+                ByProject::class,
+                ByTax::class,
+                BySearch::class
+            ])
+            ->thenReturn()
+            ->paginate($request->per_page);
 
         return new PurchaseCollection($purchases);
     }
