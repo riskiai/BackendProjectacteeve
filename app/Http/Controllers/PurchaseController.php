@@ -271,7 +271,7 @@ class PurchaseController extends Controller
                 }
             }
 
-            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax', 'client_id']));
+            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax_ppn', 'client_id']));
 
             DB::commit();
             return MessageActeeve::success("doc no $docNo has been updated");
