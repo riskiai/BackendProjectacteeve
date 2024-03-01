@@ -84,6 +84,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // end point puchase resource
     Route::get('purchase/counting', [PurchaseController::class, 'counting']); // buat kotak besar
+    Route::put('purchase/activate/{id}', [PurchaseController::class, 'activate']);
     Route::put('purchase/undo/{id}', [PurchaseController::class, 'undo']);
     Route::put('purchase/accept/{id}', [PurchaseController::class, 'accept']);
     Route::put('purchase/reject/{id}', [PurchaseController::class, 'reject']);

@@ -341,7 +341,7 @@ class PurchaseController extends Controller
                 }
             }
 
-            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax_id']));
+            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax', 'client_id']));
 
             DB::commit();
             return MessageActeeve::success("doc no $docNo has been updated");
@@ -349,6 +349,14 @@ class PurchaseController extends Controller
             DB::rollBack();
             return MessageActeeve::error($th->getMessage());
         }
+    }
+
+    public function activate(UpdateRequest $request, $docNo)
+    {
+        $request->merge([
+            'purchase_status_id' => PurchaseStatus::AWAITING
+        ]);
+        return $this->update($request, $docNo);
     }
 
     public function destroy($docNo)
