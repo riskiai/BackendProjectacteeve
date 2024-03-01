@@ -29,6 +29,10 @@ class ProjectController extends Controller
             });
         }
 
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
         if ($request->has('date')) {
             $date = str_replace(['[', ']'], '', $request->date);
             $date = explode(", ", $date);
@@ -48,11 +52,11 @@ class ProjectController extends Controller
             DB::raw('SUM(cost_estimate) as cost_estimate'),
             DB::raw('SUM(margin) as margin')
         )->first();
-    
+
         // Membuat perhitungan persentase dari total billing ke total margin
         $percent = ($project->margin / $project->billing) * 100;
         $percent = round($percent, 2) . "%";
-    
+
         return [
             "billing" => $project->billing,
             "cost_estimate" => $project->cost_estimate,
@@ -60,7 +64,7 @@ class ProjectController extends Controller
             "percent" => $percent,
         ];
     }
-    
+
 
     // public function counting(Request $request)
     //     {
@@ -154,6 +158,7 @@ class ProjectController extends Controller
                     'link' => asset("storage/$project->file")
                 ],
                 'cost_progress' => $this->costProgress($project),
+                'status' => $project->status,
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
             ]
@@ -212,6 +217,50 @@ class ProjectController extends Controller
             }
 
             $project->update($request->all());
+
+            DB::commit();
+            return MessageActeeve::success("project $project->name has been updated");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
+    }
+
+    public function accept($id)
+    {
+        DB::beginTransaction();
+
+        $project = Project::find($id);
+        if (!$project) {
+            return MessageActeeve::notFound('data not found!');
+        }
+
+        try {
+            $project->update([
+                "status" => Project::ACTIVE
+            ]);
+
+            DB::commit();
+            return MessageActeeve::success("project $project->name has been updated");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
+    }
+
+    public function reject($id)
+    {
+        DB::beginTransaction();
+
+        $project = Project::find($id);
+        if (!$project) {
+            return MessageActeeve::notFound('data not found!');
+        }
+
+        try {
+            $project->update([
+                "status" => Project::REJECTED
+            ]);
 
             DB::commit();
             return MessageActeeve::success("project $project->name has been updated");

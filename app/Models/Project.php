@@ -17,6 +17,10 @@ class Project extends Model
     const STATUS_CLOSED = 'CLOSED';
     const STATUS_NEED_TO_CHECK = 'NEED TO CHECK';
 
+    const PENDING = 0;
+    const ACTIVE = 1;
+    const REJECTED = 2;
+
     protected $table = 'projects';
 
     protected $keyType = 'string';
@@ -31,6 +35,7 @@ class Project extends Model
         'margin',
         'percent',
         'file',
+        'status',
     ];
 
     /* Ngebuat Data ID Bisa String */

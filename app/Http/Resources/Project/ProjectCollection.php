@@ -37,6 +37,7 @@ class ProjectCollection extends ResourceCollection
                     'link' => asset("storage/$project->file")
                 ],
                 'cost_progress' => $this->costProgress($project),
+                'status' => $project->status,
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
             ];
