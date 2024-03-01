@@ -82,113 +82,43 @@ class PurchaseController extends Controller
         $countRecieved = Purchase::where('purchase_id', $purchaseId)
             ->count();
 
-        $countVerified = Purchase::selectRaw("SUM(sub_total + (sub_total * ppn) / 100) as result")
+        $countVerified = Purchase::selectRaw("SUM(sub_total) as result")
             ->where('purchase_id', $purchaseId)
-            ->where('tab', Purchase::TAB_SUBMIT)
+            ->where('tab', Purchase::TAB_VERIFIED)
             ->first()->result;
 
         $countOverdue = 0;
-        $purchaseOverdue = Purchase::where('purchase_id', $purchaseId)
-            ->whereDate('due_date', '>=', Carbon::now())
-            ->where('tab', Purchase::TAB_VERIFIED)
-            ->get();
-        foreach ($purchaseOverdue as $purchase) {
-            $total = $purchase->sub_total;
-
-            if ($purchase->ppn) {
-                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
-                $total += $ppn;
-            }
-
-            if ($purchase->taxPph) {
-                $pph = ($total * $purchase->taxPph->percent) / 100;
-                $total -= $pph;
-            }
-
-            $countOverdue += $total;
-        }
-
-        $countOpen = 0;
-        $purchaseOpen = Purchase::where('purchase_id', $purchaseId)
+        $countOverdue = Purchase::selectRaw('SUM(sub_total) as result')
+            ->where('purchase_id', $purchaseId)
             ->whereDate('due_date', '<', Carbon::now())
             ->where('tab', Purchase::TAB_VERIFIED)
-            ->get();
-        foreach ($purchaseOpen as $purchase) {
-            $total = $purchase->sub_total;
+            ->first()->result;
 
-            if ($purchase->ppn) {
-                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
-                $total += $ppn;
-            }
-
-            if ($purchase->taxPph) {
-                $pph = ($total * $purchase->taxPph->percent) / 100;
-                $total -= $pph;
-            }
-
-            $countOpen += $total;
-        }
+        $countOpen = 0;
+        $countOpen = Purchase::selectRaw('SUM(sub_total) as result')
+            ->where('purchase_id', $purchaseId)
+            ->whereDate('due_date', '>', Carbon::now())
+            ->where('tab', Purchase::TAB_VERIFIED)
+            ->first()->result;
 
         $countDueDate = 0;
-        $purchaseDueDate = Purchase::where('purchase_id', $purchaseId)
+        $countDueDate = Purchase::selectRaw('SUM(sub_total) as result')
+            ->where('purchase_id', $purchaseId)
             ->whereDate('due_date',  Carbon::now())
             ->where('tab', Purchase::TAB_VERIFIED)
-            ->get();
-        foreach ($purchaseDueDate as $purchase) {
-            $total = $purchase->sub_total;
-
-            if ($purchase->ppn) {
-                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
-                $total += $ppn;
-            }
-
-            if ($purchase->taxPph) {
-                $pph = ($total * $purchase->taxPph->percent) / 100;
-                $total -= $pph;
-            }
-
-            $countDueDate += $total;
-        }
+            ->first()->result;
 
         $countPaymentRequest = 0;
-        $purchaseDueDate = Purchase::where('purchase_id', $purchaseId)
+        $countPaymentRequest = Purchase::selectRaw('SUM(sub_total) as result')
+            ->where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
-            ->get();
-        foreach ($purchaseDueDate as $purchase) {
-            $total = $purchase->sub_total;
-
-            if ($purchase->ppn) {
-                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
-                $total += $ppn;
-            }
-
-            if ($purchase->taxPph) {
-                $pph = ($total * $purchase->taxPph->percent) / 100;
-                $total -= $pph;
-            }
-
-            $countPaymentRequest += $total;
-        }
+            ->first()->result;
 
         $countPaid = 0;
-        $purchaseDueDate = Purchase::where('purchase_id', $purchaseId)
+        $countPaid = Purchase::selectRaw('SUM(sub_total) as result')
+            ->where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAID)
-            ->get();
-        foreach ($purchaseDueDate as $purchase) {
-            $total = $purchase->sub_total;
-
-            if ($purchase->ppn) {
-                $ppn = ($purchase->sub_total * $purchase->ppn) / 100;
-                $total += $ppn;
-            }
-
-            if ($purchase->taxPph) {
-                $pph = ($total * $purchase->taxPph->percent) / 100;
-                $total -= $pph;
-            }
-
-            $countPaid += $total;
-        }
+            ->first()->result;
 
         return [
             'status' => MessageActeeve::SUCCESS,
