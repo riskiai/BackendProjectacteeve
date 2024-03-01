@@ -9,5 +9,5 @@ class LogPurchase extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['doc_no', 'tab', 'name'];
+    protected $fillable = ['doc_no', 'tab', 'name', 'note_reject'];
 }

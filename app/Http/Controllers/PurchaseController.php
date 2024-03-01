@@ -291,7 +291,8 @@ class PurchaseController extends Controller
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
                 "ppn" => $this->getPpn($purchase),
-                "log" => $purchase->logs()->select('name', 'created_at')->latest()->first(),
+                "log" => $purchase->logs()->select('name', 'created_at')->where('note_reject', null)->latest()->first(),
+                "logs_rejected" => $purchase->logs()->select('name', 'note_reject', 'created_at')->where('note_reject', '!=', null)->orderBy('id', 'desc')->get(),
                 "created_at" => $purchase->created_at,
                 "updated_at" => $purchase->updated_at,
             ];
@@ -418,16 +419,16 @@ class PurchaseController extends Controller
         }
 
         try {
-            $purchase->logs()->updateOrCreate([
+            $purchase->logs()->create([
                 'tab' => Purchase::TAB_SUBMIT,
-                'name' => auth()->user()->name
-            ], [
-                'name' => auth()->user()->name
+                'name' => auth()->user()->name,
+                'note_reject' => $request->note
             ]);
 
             Purchase::whereDocNo($docNo)->update([
                 'purchase_status_id' => PurchaseStatus::REJECTED,
-                'reject_note' => $request->note
+                'reject_note' => $request->note,
+                'tab' => Purchase::TAB_SUBMIT
             ]);
 
             DB::commit();
