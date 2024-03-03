@@ -33,6 +33,20 @@ class TaxController extends Controller
     {
         $query = Tax::query();
 
+        if ($request->has('search')) {
+            $query->where(function ($query) use ($request) {
+                $query->where('id', 'like', '%' . $request->search . '%');
+                $query->orWhere('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->has('date')) {
+            $date = str_replace(['[', ']'], '', $request->date);
+            $date = explode(", ", $date);
+
+            $query->whereBetween('created_at', $date);
+        }
+
         $tax = $query->paginate($request->per_page);
 
         return new TaxCollection($tax);

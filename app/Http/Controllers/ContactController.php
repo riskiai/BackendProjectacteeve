@@ -48,6 +48,14 @@ class ContactController extends Controller
             });
         }
 
+        if ($request->has('date')) {
+            $date = str_replace(['[', ']'], '', $request->date);
+            $date = explode(", ", $date);
+
+            $query->whereBetween('created_at', $date);
+        }
+
+
         // keluaran dari index ini merupakan paginate
         $contacts = $query->paginate($request->per_page);
 
