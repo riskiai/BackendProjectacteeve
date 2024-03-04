@@ -11,7 +11,7 @@ class ByPurchaseID
     public function handle(Builder $query, Closure $next)
     {
         if (auth()->user()->role_id == Role::USER) {
-            $query->where('created_by', auth()->user()->id);
+            $query->where('user_id', auth()->user()->id);
         }
 
         if (!request()->has('purchase_id')) {
