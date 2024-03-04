@@ -22,6 +22,7 @@ use App\Models\Document;
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseStatus;
+use App\Models\Role;
 use App\Models\Tax;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -80,11 +81,21 @@ class PurchaseController extends Controller
         $purchaseId = $request->purchase_id ?? 1;
 
         $countRecieved = Purchase::where('purchase_id', $purchaseId)
+            ->where(function ($query) {
+                if (auth()->user()->role_id == Role::USER) {
+                    $query->where('user_id', auth()->user()->id);
+                }
+            })
             ->count();
 
         $countVerified = Purchase::selectRaw("SUM(sub_total) as result")
             ->where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_VERIFIED)
+            ->where(function ($query) {
+                if (auth()->user()->role_id == Role::USER) {
+                    $query->where('user_id', auth()->user()->id);
+                }
+            })
             ->first()->result;
 
         $countOverdue = 0;
@@ -92,6 +103,11 @@ class PurchaseController extends Controller
             ->where('purchase_id', $purchaseId)
             ->whereDate('due_date', '<', Carbon::now())
             ->where('tab', Purchase::TAB_VERIFIED)
+            ->where(function ($query) {
+                if (auth()->user()->role_id == Role::USER) {
+                    $query->where('user_id', auth()->user()->id);
+                }
+            })
             ->first()->result;
 
         $countOpen = 0;
@@ -99,6 +115,11 @@ class PurchaseController extends Controller
             ->where('purchase_id', $purchaseId)
             ->whereDate('due_date', '>', Carbon::now())
             ->where('tab', Purchase::TAB_VERIFIED)
+            ->where(function ($query) {
+                if (auth()->user()->role_id == Role::USER) {
+                    $query->where('user_id', auth()->user()->id);
+                }
+            })
             ->first()->result;
 
         $countDueDate = 0;
@@ -106,18 +127,33 @@ class PurchaseController extends Controller
             ->where('purchase_id', $purchaseId)
             ->whereDate('due_date',  Carbon::now())
             ->where('tab', Purchase::TAB_VERIFIED)
+            ->where(function ($query) {
+                if (auth()->user()->role_id == Role::USER) {
+                    $query->where('user_id', auth()->user()->id);
+                }
+            })
             ->first()->result;
 
         $countPaymentRequest = 0;
         $countPaymentRequest = Purchase::selectRaw('SUM(sub_total) as result')
             ->where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
+            ->where(function ($query) {
+                if (auth()->user()->role_id == Role::USER) {
+                    $query->where('user_id', auth()->user()->id);
+                }
+            })
             ->first()->result;
 
         $countPaid = 0;
         $countPaid = Purchase::selectRaw('SUM(sub_total) as result')
             ->where('purchase_id', $purchaseId)
             ->where('tab', Purchase::TAB_PAID)
+            ->where(function ($query) {
+                if (auth()->user()->role_id == Role::USER) {
+                    $query->where('user_id', auth()->user()->id);
+                }
+            })
             ->first()->result;
 
         return [
@@ -255,7 +291,7 @@ class PurchaseController extends Controller
         }
 
         $company = Company::find($request->client_id);
-        if ($company->contact_type_id != ContactType::VENDOR) {
+        if ($company->contact_type_id == ContactType::VENDOR) {
             return MessageActeeve::warning("this contact is not a vendor type");
         }
 
@@ -271,7 +307,7 @@ class PurchaseController extends Controller
                 }
             }
 
-            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax_ppn', 'client_id']));
+            Purchase::whereDocNo($docNo)->update($request->except(['_method', 'attachment_file', 'tax', 'client_id']));
 
             DB::commit();
             return MessageActeeve::success("doc no $docNo has been updated");
