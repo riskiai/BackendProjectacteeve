@@ -9,6 +9,8 @@ use App\Http\Resources\Project\ProjectCollection;
 use App\Models\Company;
 use App\Models\ContactType;
 use App\Models\Project;
+use App\Models\Purchase;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +20,14 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
         $query = Project::query();
+
+        if (auth()->user()->role_id == Role::USER) {
+            $query->where(function ($query) {
+                $query->whereHas('project.purchases', function ($query) {
+                    $query->where('user_id', auth()->user()->id);
+                });
+            });
+        }
 
         if ($request->has('search')) {
             $query->where(function ($query) use ($request) {
@@ -31,6 +41,10 @@ class ProjectController extends Controller
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->has('vendor')) {
+            $query->where('company_id', $request->vendor);
         }
 
         if ($request->has('date')) {
@@ -138,30 +152,26 @@ class ProjectController extends Controller
         }
 
         return MessageActeeve::render([
-            'status' => MessageActeeve::SUCCESS,
-            'status_code' => MessageActeeve::HTTP_OK,
-            'data' => [
-                'id' => $project->id,
-                'client' => [
-                    'id' => $project->company->id,
-                    'name' => $project->company->name,
-                    'contact_type' => $project->company->contactType->name,
-                ],
-                'date' => $project->date,
-                'name' => $project->name,
-                'billing' => $project->billing,
-                'cost_estimate' => $project->cost_estimate,
-                'margin' => $project->margin,
-                'percent' => $project->percent,
-                'file_attachment' => [
-                    'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.pdf',
-                    'link' => asset("storage/$project->file")
-                ],
-                'cost_progress' => $this->costProgress($project),
-                'status' => $this->getStatus($project->status),
-                'created_at' => $project->created_at,
-                'updated_at' => $project->updated_at,
-            ]
+            'id' => $project->id,
+            'client' => [
+                'id' => $project->company->id,
+                'name' => $project->company->name,
+                'contact_type' => $project->company->contactType->name,
+            ],
+            'date' => $project->date,
+            'name' => $project->name,
+            'billing' => $project->billing,
+            'cost_estimate' => $project->cost_estimate,
+            'margin' => $project->margin,
+            'percent' => $project->percent,
+            'file_attachment' => [
+                'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.pdf',
+                'link' => asset("storage/$project->file")
+            ],
+            'cost_progress' => $this->costProgress($project),
+            'status' => $this->getStatus($project->status),
+            'created_at' => $project->created_at,
+            'updated_at' => $project->updated_at,
         ]);
     }
 
@@ -319,7 +329,9 @@ class ProjectController extends Controller
         $status = Project::STATUS_OPEN;
         $total = 0;
 
-        foreach ($project->purchases as $purchase) {
+        $purchases = $project->purchases()->where('tab', Purchase::TAB_PAID)->get();
+
+        foreach ($purchases as $purchase) {
             $total += $purchase->sub_total;
         }
 
