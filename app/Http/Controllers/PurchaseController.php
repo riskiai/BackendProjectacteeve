@@ -493,9 +493,13 @@ class PurchaseController extends Controller
                 'name' => auth()->user()->name
             ]);
 
-            Purchase::whereDocNo($docNo)->update([
-                'tab' => $purchase->tab - 1,
-            ]);
+            $params = ['tab' => $purchase->tab - 1];
+
+            if ($purchase->tab == Purchase::TAB_VERIFIED) {
+                $params['purchase_status_id'] = Purchase::AWAITING;
+            }
+
+            Purchase::whereDocNo($docNo)->update($params);
 
             DB::commit();
             return MessageActeeve::success("purchase $docNo undo successfully");
