@@ -496,7 +496,7 @@ class PurchaseController extends Controller
             $params = ['tab' => $purchase->tab - 1];
 
             if ($purchase->tab == Purchase::TAB_VERIFIED) {
-                $params['purchase_status_id'] = Purchase::AWAITING;
+                $params['purchase_status_id'] = PurchaseStatus::AWAITING;
             }
 
             Purchase::whereDocNo($docNo)->update($params);
