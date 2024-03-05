@@ -8,6 +8,8 @@ use App\Http\Requests\Project\UpdateRequest;
 use App\Http\Resources\Project\ProjectCollection;
 use App\Models\Company;
 use App\Models\ContactType;
+use App\Facades\Filters\Purchase\ByProject;
+use Illuminate\Pipeline\Pipeline;
 use App\Models\Project;
 use App\Models\Purchase;
 use App\Models\Role;
@@ -37,6 +39,11 @@ class ProjectController extends Controller
                     $query->where('name', 'like', '%' . $request->search . '%');
                 });
             });
+        }
+
+         // Lakukan filter berdasarkan project jika ada
+        if ($request->has('project')) {
+            $query->where('id', $request->project);
         }
 
         if ($request->has('status')) {
