@@ -247,9 +247,10 @@ class PurchaseController extends Controller
                 ByVendor::class,
                 ByProject::class,
                 ByTax::class,
-                BySearch::class
+                BySearch::class,
             ])
             ->thenReturn()
+            ->orderBy('created_at', 'desc')
             ->paginate($request->per_page);
 
         return new PurchaseCollection($purchases);
