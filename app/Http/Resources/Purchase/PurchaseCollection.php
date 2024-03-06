@@ -51,7 +51,6 @@ class PurchaseCollection extends ResourceCollection
                     "name" => $purchase->user->name,
                 ];
             }
-
             if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
                 if ($purchase->project) {
                     $data[$key]['project'] = [

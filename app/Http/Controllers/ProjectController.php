@@ -41,7 +41,7 @@ class ProjectController extends Controller
             });
         }
 
-         // Lakukan filter berdasarkan project jika ada
+        // Lakukan filter berdasarkan project jika ada
         if ($request->has('project')) {
             $query->where('id', $request->project);
         }
@@ -68,63 +68,71 @@ class ProjectController extends Controller
 
     public function counting(Request $request)
     {
-        $project = Project::select(
+        $query = Project::query();
+        $query->select(
             DB::raw('SUM(billing) as billing'),
             DB::raw('SUM(cost_estimate) as cost_estimate'),
             DB::raw('SUM(margin) as margin')
-        )->first();
+        );
 
-        // Membuat perhitungan persentase dari total billing ke total margin
-        $percent = ($project->margin / $project->billing) * 100;
+        if (auth()->user()->role_id == Role::USER) {
+            $query->where(function ($query) {
+                $query->whereHas('purchases', function ($query) {
+                    $query->where('user_id', auth()->user()->id);
+                });
+            });
+        }
+
+        if ($request->has('search')) {
+            $query->where(function ($query) use ($request) {
+                $query->where('id', 'like', '%' . $request->search . '%');
+                $query->orWhere('name', 'like', '%' . $request->search . '%');
+                $query->orWhereHas('company', function ($query) use ($request) {
+                    $query->where('name', 'like', '%' . $request->search . '%');
+                });
+            });
+        }
+
+        // Lakukan filter berdasarkan project jika ada
+        if ($request->has('project')) {
+            $query->where('id', $request->project);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('vendor')) {
+            $query->where('company_id', $request->vendor);
+        }
+
+        if ($request->has('date')) {
+            $date = str_replace(['[', ']'], '', $request->date);
+            $date = explode(", ", $date);
+
+            $query->whereBetween('created_at', $date);
+        }
+        $projectStats = $query->first();
+
+        if (!$projectStats->billing || !$projectStats->margin || !$projectStats->cost_estimate) {
+            return [
+                "billing" => 0,
+                "cost_estimate" => 0,
+                "margin" => 0,
+                "percent" => '0%',
+            ];
+        }
+
+        $percent = ($projectStats->margin / $projectStats->billing) * 100;
         $percent = round($percent, 2) . "%";
 
         return [
-            "billing" => $project->billing,
-            "cost_estimate" => $project->cost_estimate,
-            "margin" => $project->margin,
+            "billing" => $projectStats->billing,
+            "cost_estimate" => $projectStats->cost_estimate,
+            "margin" => $projectStats->margin,
             "percent" => $percent,
         ];
     }
-
-
-    // public function counting(Request $request)
-    //     {
-    //         $project = Project::select(
-    //             DB::raw('SUM(billing) as billing'),
-    //             DB::raw('SUM(cost_estimate) as cost_estimate'),
-    //             DB::raw('SUM(margin) as margin')
-    //         )->first();
-
-    //         // Membuat perhitungan persentase dari total billing ke total margin
-    //         $percent = ($project->billing / $project->margin) * 100;
-    //         $percent = round($percent, 2) . "%";
-
-    //         $data = [
-    //             [
-    //                 'title' => 'BILLING',
-    //                 'amount' => $project->billing
-    //             ],
-    //             [
-    //                 'title' => 'COST ESTIMATE',
-    //                 'amount' => $project->cost_estimate
-    //             ],
-    //             [
-    //                 'title' => 'MARGIN',
-    //                 'amount' => $project->margin
-    //             ],
-    //             [
-    //                 'title' => 'PERCENT',
-    //                 'amount' => $percent
-    //             ]
-    //         ];
-
-    //         return [
-    //             'status' => MessageActeeve::SUCCESS,
-    //             'status_code' => MessageActeeve::HTTP_OK,
-    //             'data' => $data
-    //         ];
-    //     }
-
 
     public function store(CreateRequest $request)
     {
