@@ -16,6 +16,7 @@ use App\Http\Requests\Purchase\CreateRequest;
 use App\Http\Requests\Purchase\UpdateRequest;
 use App\Http\Resources\Purchase\PurchaseCollection;
 use App\Http\Resources\Purchase\PurchaseCounting;
+// use Carbon\Carbon;
 use App\Models\Company;
 use App\Models\ContactType;
 use App\Models\Document;
@@ -175,6 +176,9 @@ class PurchaseController extends Controller
     public function index(Request $request)
     {
         $query = Purchase::query();
+
+        // Tambahkan filter berdasarkan tanggal terkini
+        $query->whereDate('date', Carbon::today());
 
         $purchases = app(Pipeline::class)
             ->send($query)
