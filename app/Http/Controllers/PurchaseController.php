@@ -178,7 +178,7 @@ class PurchaseController extends Controller
         $query = Purchase::query();
 
         // Tambahkan filter berdasarkan tanggal terkini
-        $query->whereDate('date', Carbon::today());
+        // $query->whereDate('date', Carbon::today());
 
         $purchases = app(Pipeline::class)
             ->send($query)
