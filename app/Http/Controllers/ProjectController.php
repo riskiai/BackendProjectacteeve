@@ -12,6 +12,7 @@ use App\Facades\Filters\Purchase\ByProject;
 use Illuminate\Pipeline\Pipeline;
 use App\Models\Project;
 use App\Models\Purchase;
+use App\Models\PurchaseStatus;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -200,16 +201,18 @@ class ProjectController extends Controller
         $data = [];
 
         foreach ($project->purchases as $purchase) {
-            $data[] = [
-                "date" => $purchase->date,
-                "contact" => $purchase->company->name,
-                "description" => $purchase->description,
-                "total" => $purchase->total,
-                "status" => [
-                    $purchase->purchase_status_id,
-                    $purchase->purchaseStatus->name
-                ]
-            ];
+            if ($purchase->purchase_status_id != PurchaseStatus::REJECTED) {
+                $data[] = [
+                    "date" => $purchase->date,
+                    "contact" => $purchase->company->name,
+                    "description" => $purchase->description,
+                    "total" => $purchase->total,
+                    "status" => [
+                        $purchase->purchase_status_id,
+                        $purchase->purchaseStatus->name
+                    ]
+                ];
+            }
         }
 
         return MessageActeeve::render([
