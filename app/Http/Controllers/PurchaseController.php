@@ -233,10 +233,10 @@ class PurchaseController extends Controller
     public function index(Request $request)
     {
         $query = Purchase::query();
-
+    
         // Tambahkan filter berdasarkan tanggal terkini
         // $query->whereDate('date', Carbon::today());
-
+    
         $purchases = app(Pipeline::class)
             ->send($query)
             ->through([
@@ -249,12 +249,26 @@ class PurchaseController extends Controller
                 ByTax::class,
                 BySearch::class,
             ])
-            ->thenReturn()
-            ->orderBy('date', 'desc')
-            ->paginate($request->per_page);
-
+            ->thenReturn();
+    
+        // Tambahkan kondisi untuk pengurutan berdasarkan tab
+        if (request()->has('tab')) {
+            if (request('tab') == Purchase::TAB_SUBMIT) {
+                $purchases->orderBy('date', 'desc');
+            } else {
+                $purchases->orderBy('due_date', 'asc');
+            }
+        } else {
+            // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
+            $purchases->orderBy('date', 'desc');
+        }
+    
+        $purchases = $purchases->paginate($request->per_page);
+    
         return new PurchaseCollection($purchases);
     }
+    
+    
 
     public function store(CreateRequest $request)
     {
