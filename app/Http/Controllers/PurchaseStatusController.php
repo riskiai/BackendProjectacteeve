@@ -10,7 +10,7 @@ class PurchaseStatusController extends Controller
 {
     public function index()
     {
-        $purchaseStatus = PurchaseStatus::all();
+        $purchaseStatus = PurchaseStatus::whereNotIn('id', [PurchaseStatus::VERIFIED])->get();
 
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,

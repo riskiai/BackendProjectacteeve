@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\Filters\Purchase\ByDate;
 use App\Facades\MessageActeeve;
 use App\Http\Requests\Project\CreateRequest;
 use App\Http\Requests\Project\UpdateRequest;
@@ -9,9 +10,15 @@ use App\Http\Resources\Project\ProjectCollection;
 use App\Models\Company;
 use App\Models\ContactType;
 use App\Facades\Filters\Purchase\ByProject;
+use App\Facades\Filters\Purchase\BySearch;
+use App\Facades\Filters\Purchase\ByStatus;
+use App\Facades\Filters\Purchase\ByTab;
+use App\Facades\Filters\Purchase\ByTax;
+use App\Facades\Filters\Purchase\ByVendor;
 use Illuminate\Pipeline\Pipeline;
 use App\Models\Project;
 use App\Models\Purchase;
+use App\Models\PurchaseStatus;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -190,7 +197,7 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function invoice($id)
+    public function invoice(Request $request, $id)
     {
         $project = Project::find($id);
         if (!$project) {
@@ -198,24 +205,50 @@ class ProjectController extends Controller
         }
 
         $data = [];
+        $purchases = app(Pipeline::class)
+            ->send(Purchase::query())
+            ->through([
+                ByTab::class,
+                ByDate::class,
+                ByStatus::class,
+                ByVendor::class,
+                ByProject::class,
+                ByTax::class,
+                BySearch::class,
+            ])
+            ->thenReturn()
+            ->where('project_id', $id)
+            ->orderBy('date', 'desc')
+            ->paginate($request->per_page);
 
-        foreach ($project->purchases as $purchase) {
-            $data[] = [
-                "date" => $purchase->date,
-                "contact" => $purchase->company->name,
-                "description" => $purchase->description,
-                "total" => $purchase->total,
-                "status" => [
-                    $purchase->purchase_status_id,
-                    $purchase->purchaseStatus->name
-                ]
-            ];
+        foreach ($purchases as $purchase) {
+            if ($purchase->purchase_status_id != PurchaseStatus::REJECTED) {
+                $data[] = [
+                    "date" => $purchase->date,
+                    "contact" => $purchase->company->name,
+                    "description" => $purchase->description,
+                    "total" => $purchase->total,
+                    "status" => [
+                        $purchase->purchase_status_id,
+                        $purchase->purchaseStatus->name
+                    ]
+                ];
+            }
         }
 
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
-            'data' => $data
+            'data' => $data,
+            'meta' => [
+                'current_page' => $purchases->currentPage(),
+                'from' => $purchases->firstItem(),
+                'last_page' => $purchases->lastPage(),
+                'path' => $purchases->path(),
+                'per_page' => $purchases->perPage(),
+                'to' => $purchases->lastItem(),
+                'total' => $purchases->total(),
+            ]
         ]);
     }
 
