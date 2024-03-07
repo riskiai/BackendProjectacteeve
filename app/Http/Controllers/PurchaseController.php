@@ -250,7 +250,7 @@ class PurchaseController extends Controller
                 BySearch::class,
             ])
             ->thenReturn()
-            ->orderBy('created_at', 'desc')
+            ->orderBy('date', 'desc')
             ->paginate($request->per_page);
 
         return new PurchaseCollection($purchases);
