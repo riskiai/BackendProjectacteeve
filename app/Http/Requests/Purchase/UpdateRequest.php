@@ -27,7 +27,7 @@ class UpdateRequest extends FormRequest
     {
         $request = [
             'purchase_id' => 'required|in:1,2',
-            'purchase_category_id' => 'required|exists:purchase_category,id',
+            'purchase_category_id' => 'nullable|exists:purchase_category,id',
             'client_id' => 'required|exists:companies,id',
             'tax_ppn' => 'nullable|string',
             'sub_total' => 'required|numeric',
