@@ -581,7 +581,7 @@ class PurchaseController extends Controller
         }
 
         try {
-            Storage::delete($purchase->path_file);
+            Storage::delete($purchase->file_path);
             $purchase->delete();
 
             DB::commit();
