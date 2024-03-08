@@ -32,7 +32,7 @@ class UpdateRequest extends FormRequest
             'tax_ppn' => 'nullable|string',
             'sub_total' => 'required|numeric',
             'attachment_file' => 'array',
-            'attachment_file.*' => 'mimes:pdf,png,jpg|max:5120',
+            'attachment_file.*' => 'mimes:pdf,png,jpg|max:3072',
             'date' => 'required|date',
             'due_date' => 'required|date',
         ];
