@@ -75,7 +75,7 @@ class PurchaseCollection extends ResourceCollection
         foreach ($documents->documents as $document) {
             $data[] = [
                 "id" => $document->id,
-                "name" => $document->purchase->doc_type . "/$document->doc_no.$document->id/" . date('Y', strtotime($document->created_at)) . ".pdf",
+                "name" => $document->purchase->doc_type . "/$document->doc_no.$document->id/" . date('Y', strtotime($document->created_at)) . "." . pathinfo($document->file_path, PATHINFO_EXTENSION),
                 "link" => asset("storage/$document->file_path"),
             ];
         }

@@ -187,7 +187,7 @@ class ProjectController extends Controller
             'margin' => $project->margin,
             'percent' => $project->percent,
             'file_attachment' => [
-                'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.pdf',
+                'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.' . pathinfo($project->file, PATHINFO_EXTENSION),
                 'link' => asset("storage/$project->file")
             ],
             'cost_progress' => $this->costProgress($project),

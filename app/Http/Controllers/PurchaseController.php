@@ -34,160 +34,12 @@ use Illuminate\Support\Facades\Storage;
 
 class PurchaseController extends Controller
 {
-    // public function counting(Request $request)
-    // {
-    //     $purchaseId = $request->purchase_id ?? 1;
-
-    //     $countVerified = Purchase::where('purchase_id', $purchaseId)
-    //         ->where('purchase_status_id', PurchaseStatus::VERIFIED)
-    //         ->sum(DB::raw('sub_total + ppn'));
-    //     $countDueDate = Purchase::where('purchase_id', $purchaseId)
-    //         ->where('purchase_status_id', PurchaseStatus::DUEDATE)
-    //         ->sum(DB::raw('sub_total + ppn'));
-    //     $countPaymentRequest = Purchase::where('purchase_id', $purchaseId)
-    //         ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
-    //         ->sum(DB::raw('sub_total + ppn'));
-    //     $countPaid = Purchase::where('purchase_id', $purchaseId)
-    //         ->where('tab', Purchase::TAB_PAID)
-    //         ->sum(DB::raw('sub_total + ppn'));
-
-    //     $data = [
-    //         [
-    //             'title' => 'VERIFIED',
-    //             'amount' => $countVerified
-    //         ],
-    //         [
-    //             'title' => 'DUE DATE',
-    //             'amount' => $countDueDate
-    //         ],
-    //         [
-    //             'title' => 'PAYMENT REQUEST',
-    //             'amount' => $countPaymentRequest
-    //         ],
-    //         [
-    //             'title' => 'PAID',
-    //             'amount' => $countPaid
-    //         ]
-    //     ];
-
-    //     return [
-    //         'status' => MessageActeeve::SUCCESS,
-    //         'status_code' => MessageActeeve::HTTP_OK,
-    //         'data' => $data
-    //     ];
-    // }
-
     public function counting(Request $request)
     {
-        // $purchaseId = $request->purchase_id ?? 1;
-
-        // $countRecieved = Purchase::where('purchase_id', $purchaseId)
-        //     ->where(function ($query) {
-        //         if (auth()->user()->role_id == Role::USER) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         }
-        //     })
-        //     ->count();
-
-        // $countVerified = Purchase::selectRaw("SUM(sub_total) as result")
-        //     ->where('purchase_id', $purchaseId)
-        //     ->where('tab', Purchase::TAB_VERIFIED)
-        //     ->where(function ($query) {
-        //         if (auth()->user()->role_id == Role::USER) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         }
-        //     })
-        //     ->first()->result;
-
-        // $countOverdue = 0;
-        // $countOverdue = Purchase::selectRaw('SUM(sub_total) as result')
-        //     ->where('purchase_id', $purchaseId)
-        //     ->whereDate('due_date', '<', Carbon::now())
-        //     ->where('tab', Purchase::TAB_VERIFIED)
-        //     ->where(function ($query) {
-        //         if (auth()->user()->role_id == Role::USER) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         }
-        //     })
-        //     ->first()->result;
-
-        // $countOpen = 0;
-        // $countOpen = Purchase::selectRaw('SUM(sub_total) as result')
-        //     ->where('purchase_id', $purchaseId)
-        //     ->whereDate('due_date', '>', Carbon::now())
-        //     ->where('tab', Purchase::TAB_VERIFIED)
-        //     ->where(function ($query) {
-        //         if (auth()->user()->role_id == Role::USER) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         }
-        //     })
-        //     ->first()->result;
-
-        // $countDueDate = 0;
-        // $countDueDate = Purchase::selectRaw('SUM(sub_total) as result')
-        //     ->where('purchase_id', $purchaseId)
-        //     ->whereDate('due_date',  Carbon::now())
-        //     ->where('tab', Purchase::TAB_VERIFIED)
-        //     ->where(function ($query) {
-        //         if (auth()->user()->role_id == Role::USER) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         }
-        //     })
-        //     ->first()->result;
-
-        // $countPaymentRequest = 0;
-        // $countPaymentRequest = Purchase::selectRaw('SUM(sub_total) as result')
-        //     ->where('purchase_id', $purchaseId)
-        //     ->where('tab', Purchase::TAB_PAYMENT_REQUEST)
-        //     ->where(function ($query) {
-        //         if (auth()->user()->role_id == Role::USER) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         }
-        //     })
-        //     ->first()->result;
-
-        // $countPaid = 0;
-        // $countPaid = Purchase::selectRaw('SUM(sub_total) as result')
-        //     ->where('purchase_id', $purchaseId)
-        //     ->where('tab', Purchase::TAB_PAID)
-        //     ->where(function ($query) {
-        //         if (auth()->user()->role_id == Role::USER) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         }
-        //     })
-        //     ->first()->result;
-
-        // return [
-        //     'status' => MessageActeeve::SUCCESS,
-        //     'status_code' => MessageActeeve::HTTP_OK,
-        //     "data" => [
-        //         "recieved" => $countRecieved,
-        //         "verified" => $countVerified,
-        //         "over_due" => $countOverdue,
-        //         "open" => $countOpen,
-        //         "due_date" => $countDueDate,
-        //         "payment_request" => $countPaymentRequest,
-        //         "paid" => $countPaid,
-        //     ]
-        // ];
         $purchaseId = $request->purchase_id ?? 1;
         $userId = auth()->id();
         $role = auth()->user()->role_id;
 
-        // $counts = Purchase::selectRaw("
-        //     COUNT(*) as recieved,
-        //     SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN sub_total ELSE 0 END) as verified,
-        //     SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date < NOW() THEN sub_total ELSE 0 END) as over_due,
-        //     SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN sub_total ELSE 0 END) as open,
-        //     SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN sub_total ELSE 0 END) as due_date,
-        //     SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN sub_total ELSE 0 END) as payment_request,
-        //     SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN sub_total ELSE 0 END) as paid
-        // ")
-        //     ->where('purchase_id', $purchaseId)
-        //     ->when($role == Role::USER, function ($query) use ($userId) {
-        //         return $query->where('user_id', $userId);
-        //     })
-        //     ->first();
         $counts = app(Pipeline::class)
             ->send(Purchase::query())
             ->through([
@@ -233,10 +85,10 @@ class PurchaseController extends Controller
     public function index(Request $request)
     {
         $query = Purchase::query();
-    
+
         // Tambahkan filter berdasarkan tanggal terkini
         // $query->whereDate('date', Carbon::today());
-    
+
         $purchases = app(Pipeline::class)
             ->send($query)
             ->through([
@@ -250,7 +102,7 @@ class PurchaseController extends Controller
                 BySearch::class,
             ])
             ->thenReturn();
-    
+
         // Tambahkan kondisi untuk pengurutan berdasarkan tab
         if (request()->has('tab')) {
             if (request('tab') == Purchase::TAB_SUBMIT) {
@@ -262,13 +114,13 @@ class PurchaseController extends Controller
             // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
             $purchases->orderBy('date', 'desc');
         }
-    
+
         $purchases = $purchases->paginate($request->per_page);
-    
+
         return new PurchaseCollection($purchases);
     }
-    
-    
+
+
 
     public function store(CreateRequest $request)
     {
@@ -620,7 +472,7 @@ class PurchaseController extends Controller
         foreach ($documents->documents as $document) {
             $data[] = [
                 "id" => $document->id,
-                "name" => $document->purchase->doc_type . "/$document->doc_no.$document->id/" . date('Y', strtotime($document->created_at)) . ".pdf",
+                "name" => $document->purchase->doc_type . "/$document->doc_no.$document->id/" . date('Y', strtotime($document->created_at)) . "." . pathinfo($document->file_path, PATHINFO_EXTENSION),
                 "link" => asset("storage/$document->file_path"),
             ];
         }
