@@ -283,15 +283,21 @@ class PurchaseController extends Controller
         }
 
         $pph = Tax::find($request->pph_id);
+        $request->merge([
+            'purchase_status_id' => PurchaseStatus::VERIFIED,
+            'tab' => Purchase::TAB_VERIFIED,
+        ]);
+
         if ($pph && (strtolower($pph->type) != Tax::TAX_PPH)) {
             return MessageActeeve::warning("this tax is not a pph type");
         }
 
-        $request->merge([
-            'purchase_status_id' => PurchaseStatus::VERIFIED,
-            'tab' => Purchase::TAB_VERIFIED,
-            'pph' => $pph->id
-        ]);
+        if ($pph ) {
+           $request -> merge([
+               'pph' => $pph -> id 
+           ]); 
+        }
+        
 
         try {
             $purchase->logs()->updateOrCreate([
