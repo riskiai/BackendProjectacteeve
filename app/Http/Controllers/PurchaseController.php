@@ -283,7 +283,7 @@ class PurchaseController extends Controller
         }
 
         $pph = Tax::find($request->pph_id);
-        if (strtolower($pph->type) != Tax::TAX_PPH) {
+        if ($pph && (strtolower($pph->type) != Tax::TAX_PPH)) {
             return MessageActeeve::warning("this tax is not a pph type");
         }
 
