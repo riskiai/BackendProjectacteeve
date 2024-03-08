@@ -85,10 +85,10 @@ class PurchaseController extends Controller
     public function index(Request $request)
     {
         $query = Purchase::query();
-
+    
         // Tambahkan filter berdasarkan tanggal terkini
         // $query->whereDate('date', Carbon::today());
-
+    
         $purchases = app(Pipeline::class)
             ->send($query)
             ->through([
@@ -102,26 +102,26 @@ class PurchaseController extends Controller
                 BySearch::class,
             ])
             ->thenReturn();
-
-        // Tambahkan kondisi untuk pengurutan berdasarkan tab
+    
+        // kondisi untuk pengurutan berdasarkan tab
         if (request()->has('tab')) {
             if (request('tab') == Purchase::TAB_SUBMIT) {
                 $purchases->orderBy('date', 'desc');
-            } else {
+            } elseif (in_array(request('tab'), [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
                 $purchases->orderBy('due_date', 'asc');
+            } elseif (request('tab') == Purchase::TAB_PAID) {
+                $purchases->orderBy('updated_at', 'desc');
             }
         } else {
             // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
             $purchases->orderBy('date', 'desc');
         }
-
+    
         $purchases = $purchases->paginate($request->per_page);
-
+    
         return new PurchaseCollection($purchases);
     }
-
-
-
+    
     public function store(CreateRequest $request)
     {
         DB::beginTransaction();

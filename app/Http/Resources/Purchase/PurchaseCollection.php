@@ -41,8 +41,9 @@ class PurchaseCollection extends ResourceCollection
                 "due_date" => $purchase->due_date,
                 "ppn" => $this->getPpn($purchase),
                 "logs_rejected" => $purchase->logs()->select('name', 'note_reject', 'created_at')->where('note_reject', '!=', null)->orderBy('id', 'desc')->get(),
-                "created_at" => $purchase->created_at,
-                "updated_at" => $purchase->updated_at,
+                "created_at" => $purchase->created_at->format('Y-m-d'),
+                "updated_at" => $purchase->updated_at->format('Y-m-d'),                
+                
             ];
 
             if ($purchase->user) {

@@ -26,7 +26,7 @@ class AcceptRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pph_id' => 'required|exists:taxs,id'
+            'pph_id' => 'nullable|exists:taxs,id'
         ];
     }
 

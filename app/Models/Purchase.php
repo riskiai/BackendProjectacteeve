@@ -44,6 +44,8 @@ class Purchase extends Model
         'user_id',
     ];
 
+    protected $dates = ['created_at', 'updated_at'];
+
     public function taxPph(): HasOne
     {
         return $this->hasOne(Tax::class, 'id', 'pph');
