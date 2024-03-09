@@ -41,13 +41,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // end point user
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index']);
+        Route::get('me', function (Request $request) {
+            return $request->user();
+        });
         Route::get('/{id}', [UserController::class, 'show']);
         Route::put('/reset-password/{id}', [UserController::class, 'resetPassword']);
         Route::put('/update-password', [UserController::class, 'updatePassword']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
-        Route::get('me', function (Request $request) {
-            return $request->user();
-        });
         Route::post('register', RegisterController::class);
     });
 

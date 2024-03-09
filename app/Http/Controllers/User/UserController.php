@@ -42,24 +42,28 @@ class UserController extends Controller
         return new UserCollection($users);
     }
 
-    public function show()
+    public function show($id)
     {
-    $user = auth()->user();
+        $user = User::find($id);
+        if (!$user) {
+            return MessageActeeve::notFound('User not found!');
+        }
 
-    return MessageActeeve::render([
-        'status' => MessageActeeve::SUCCESS,
-        'status_code' => MessageActeeve::HTTP_OK,
-        'data' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'roles' => [
-                'id' => $user->role->id,
-                'name' => $user->role->name,
+        return MessageActeeve::render([
+            'status' => MessageActeeve::SUCCESS,
+            'status_code' => MessageActeeve::HTTP_OK,
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'roles' => [
+                    'id' => $user->role->id,
+                    'name' => $user->role->name,
+                ]
             ]
-        ]
-    ]);
+        ]);
     }
+
 
 
     public function updatePassword(UpdatePasswordRequest $request)
