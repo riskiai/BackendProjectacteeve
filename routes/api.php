@@ -11,6 +11,7 @@ use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\User\RegisterController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Resources\UserCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
