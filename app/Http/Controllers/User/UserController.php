@@ -7,9 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UpdatePasswordRequest;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\UserCollection;
+use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -49,6 +52,36 @@ class UserController extends Controller
             $user->update([
                 "password" => Hash::make($request->new_password)
             ]);
+
+            DB::commit();
+            return MessageActeeve::success("user $user->name has been updated");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
+    }
+
+    public function resetPassword(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        $user = User::find($id);
+        if (!$user) {
+            return MessageActeeve::notFound("data not found!");
+        }
+
+        $password = Str::random(8);
+        if ($request->has('password')) {
+            $password = $request->password;
+        }
+
+        try {
+            $user->update([
+                "password" => Hash::make($password)
+            ]);
+            $user->passwordRecovery = $password;
+
+            Mail::to($user)->send(new ResetPasswordMail($user));
 
             DB::commit();
             return MessageActeeve::success("user $user->name has been updated");
