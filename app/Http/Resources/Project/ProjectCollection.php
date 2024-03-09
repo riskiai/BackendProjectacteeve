@@ -90,8 +90,12 @@ class ProjectCollection extends ResourceCollection
             $status = Project::STATUS_CLOSED;
         }
 
+        // Simpan nilai status cost progress ke dalam model Project
+        $project->update(['status_cost_progress' => $status]);
+
         return [
-            'status' => $status,
+            'status_cost_progress' => $status,
+            // 'status' => $status,
             'percent' => $costEstimate . '%',
             'real_cost' => $total
         ];

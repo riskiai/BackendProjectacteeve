@@ -48,13 +48,19 @@ class ProjectController extends Controller
             });
         }
 
+       // Filter berdasarkan status project
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('status_cost_progress')) {
+            $statusCostProgress = $request->status_cost_progress;
+            $query->where('status_cost_progress', $statusCostProgress);
+        }
+
         // Lakukan filter berdasarkan project jika ada
         if ($request->has('project')) {
             $query->where('id', $request->project);
-        }
-
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
         }
 
         if ($request->has('vendor')) {
@@ -392,8 +398,12 @@ class ProjectController extends Controller
             $status = Project::STATUS_CLOSED;
         }
 
+       // Simpan nilai status cost progress ke dalam model Project
+         $project->update(['status_cost_progress' => $status]);
+
         return [
-            'status' => $status,
+            'status_cost_progress' => $status,
+            // 'status' => $status,
             'percent' => $costEstimate . '%',
             'real_cost' => $total
         ];

@@ -34,9 +34,11 @@ class Project extends Model
         'cost_estimate',
         'margin',
         'percent',
+        'status_cost_progress',
         'file',
         'status',
     ];
+
 
     /* Ngebuat Data ID Bisa String */
     protected static function boot()
