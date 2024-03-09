@@ -26,7 +26,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'contact_type' => 'required|exists:contact_type,id',
+            'contact_type' => 'nullable|exists:contact_type,id',
             'name' => 'required|max:255',
             'address' => 'required|max:255',
             'bank_name' => 'nullable|max:255',
@@ -35,11 +35,11 @@ class UpdateRequest extends FormRequest
             'currency' => 'nullable|max:255',
             'account_number' => 'nullable|numeric',
             'swift_code' => 'nullable|max:255',
-            'attachment_npwp' => 'required|mimes:pdf,png,jpg|max:3072',
+            'attachment_npwp' => 'nullable|mimes:pdf,png,jpg|max:3072',
             'pic_name' => 'required|max:255',
-            'phone' => 'required|numeric',
-            'email' => 'required|email|max:255',
-            'attachment_file' => 'required|mimes:pdf,png,jpg|max:3072',
+            'phone' => 'nullable|numeric',
+            'email' => 'nullable|email|max:255',
+            'attachment_file' => 'nullable|mimes:pdf,png,jpg|max:3072',
         ];
     }
 

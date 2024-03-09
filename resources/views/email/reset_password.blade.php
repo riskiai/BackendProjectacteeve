@@ -23,18 +23,19 @@
         </header>
         <section>
             <h3>Hallo, {{ $user->name }}</h3>
-            <p><strong>Selamat <br> Registrasi akun anda Telah Berhasil.</strong></p>
+            <p><strong>Selamat <br> Password Akun Anda Telah Berhasil Diubah.</strong></p>
             <p><strong>Email : {{ $user->email }}</strong></p>
-            <p><strong>Password : {{ $user->passwordRecovery }}</strong></p>
+            <p><strong>Password Terbaru : {{ $user->passwordRecovery }}</strong></p>
             <p><Strong>Link Website : </Strong> <a href="https://acteeveallthingsfinance.id/login"
                     style="text-decoration: none; font-size:13px; font-weight:bold; color:blue;">acteeveallthingsfinance.id</a>
             </p>
-            <p><strong>Terimakasih <br> Sudah mengguanakan layanan kami. <br> <br>
+            <p><strong>Terimakasih <br> Sudah mengguanakan Jasa layanan kami. <br> <br>
 
                     <h3>Hormat Kami <br><br> PT ACTEEVE INDONESIA</h3>
 
         </section>
         <footer>
+            <br>
             <p> <strong>Terima kasih</strong></p>
         </footer>
     </div>
