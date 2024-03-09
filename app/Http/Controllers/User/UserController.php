@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Facades\MessageActeeve;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\User\UpdatePasswordRequest;
-use Illuminate\Support\Facades\DB;
-use App\Http\Resources\UserCollection;
-use App\Mail\ResetPasswordMail;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Facades\MessageActeeve;
+use App\Mail\ResetPasswordMail;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Resources\UserCollection;
+use App\Http\Requests\User\UpdateRequest;
+use App\Http\Requests\User\UpdatePasswordRequest;
 
 class UserController extends Controller
 {
@@ -64,6 +65,42 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateRequest $request, $id)
+    {
+        DB::beginTransaction();
+    
+        $user = User::find($id);
+        if (!$user) {
+            return MessageActeeve::notFound('Data not found!');
+        }
+    
+        try {
+            $userData = [];
+    
+            // Update bidang-bidang yang disertakan dalam permintaan
+            if ($request->has('name')) {
+                $userData['name'] = $request->name;
+            }
+            if ($request->has('email')) {
+                $userData['email'] = $request->email;
+            }
+            if ($request->has('role')) {
+                $userData['role_id'] = $request->role;
+            }
+    
+            $user->update($userData);
+    
+            DB::commit();
+            return MessageActeeve::success("User $user->name has been updated");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
+    }
+    
 
 
     public function updatePassword(UpdatePasswordRequest $request)

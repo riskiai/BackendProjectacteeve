@@ -45,6 +45,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             return $request->user();
         });
         Route::get('/{id}', [UserController::class, 'show']);
+        Route::put('/update/{id}', [UserController::class, 'update']);
         Route::put('/reset-password/{id}', [UserController::class, 'resetPassword']);
         Route::put('/update-password', [UserController::class, 'updatePassword']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
