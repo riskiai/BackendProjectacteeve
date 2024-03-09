@@ -292,7 +292,7 @@ class PurchaseController extends Controller
             return MessageActeeve::warning("this tax is not a pph type");
         }
 
-        if ($pph ) {
+        if ($pph) {
            $request -> merge([
                'pph' => $pph -> id 
            ]); 

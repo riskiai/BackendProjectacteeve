@@ -29,7 +29,7 @@ class UpdateRequest extends FormRequest
         return [
             'client_id' => 'required|exists:companies,id',
             'date' => 'required|date',
-            'name' => ['required', Rule::unique('projects')->ignore(request('id'))],
+            'name' => 'required',
             'billing' => 'required|numeric',
             'margin' => 'required|numeric',
             'cost_estimate' => 'required|numeric',
