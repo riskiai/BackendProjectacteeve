@@ -17,9 +17,9 @@ class Project extends Model
     const STATUS_CLOSED = 'CLOSED';
     const STATUS_NEED_TO_CHECK = 'NEED TO CHECK';
 
-    const PENDING = 0;
-    const ACTIVE = 1;
-    const REJECTED = 2;
+    const PENDING = 1;
+    const ACTIVE = 2;
+    const REJECTED = 3;
 
     protected $table = 'projects';
 
