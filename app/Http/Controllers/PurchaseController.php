@@ -2,35 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Facades\Filters\Purchase\ByDate;
-use App\Facades\Filters\Purchase\ByProject;
-use App\Facades\Filters\Purchase\ByPurchaseID;
-use App\Facades\Filters\Purchase\ByStatus;
+use Carbon\Carbon;
+use App\Models\Tax;
+use App\Models\Role;
+use App\Models\Company;
+use App\Models\Project;
+use App\Models\Document;
+use App\Models\Purchase;
+use App\Models\ContactType;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\PurchaseStatus;
+use App\Facades\MessageActeeve;
+use App\Models\PurchaseCategory;
+use Illuminate\Pipeline\Pipeline;
+// use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Facades\Filters\Purchase\ByTab;
 use App\Facades\Filters\Purchase\ByTax;
-use App\Facades\Filters\Purchase\ByVendor;
+use Illuminate\Support\Facades\Storage;
+use App\Facades\Filters\Purchase\ByDate;
 use App\Facades\Filters\Purchase\BySearch;
-use App\Facades\MessageActeeve;
+use App\Facades\Filters\Purchase\ByStatus;
+use App\Facades\Filters\Purchase\ByVendor;
+use App\Facades\Filters\Purchase\ByProject;
 use App\Http\Requests\Purchase\AcceptRequest;
 use App\Http\Requests\Purchase\CreateRequest;
 use App\Http\Requests\Purchase\UpdateRequest;
-use App\Http\Resources\Purchase\PurchaseCollection;
+use App\Facades\Filters\Purchase\ByPurchaseID;
 use App\Http\Resources\Purchase\PurchaseCounting;
-// use Carbon\Carbon;
-use App\Models\Company;
-use App\Models\ContactType;
-use App\Models\Document;
-use App\Models\Purchase;
-use App\Models\PurchaseCategory;
-use App\Models\PurchaseStatus;
-use App\Models\Role;
-use App\Models\Tax;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\Purchase\PurchaseCollection;
 
 class PurchaseController extends Controller
 {
@@ -132,6 +133,16 @@ class PurchaseController extends Controller
     public function store(CreateRequest $request)
     {
         DB::beginTransaction();
+
+         // Mendapatkan proyek yang diinginkan
+        $project = Project::find($request->project_id);
+
+        // Melakukan pengecekan jika proyek tidak ada atau statusnya tidak aktif
+        if (!$project || $project->status != Project::ACTIVE) {
+            DB::rollBack();
+            return MessageActeeve::error("Proyek tidak tersedia atau tidak aktif.");
+        }
+
 
         $purchase = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
         $purchaseCategory = PurchaseCategory::find($request->purchase_category_id);
