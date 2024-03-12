@@ -54,6 +54,7 @@ class PurchaseController extends Controller
             ])
             ->thenReturn()->selectRaw("
             COUNT(*) as recieved,
+            SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN sub_total ELSE 0 END) as submit,
             SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN sub_total ELSE 0 END) as verified,
             SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date < NOW() THEN sub_total ELSE 0 END) as over_due,
             SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN sub_total ELSE 0 END) as open,
@@ -71,6 +72,7 @@ class PurchaseController extends Controller
             'status_code' => MessageActeeve::HTTP_OK,
             "data" => [
                 "recieved" => $counts->recieved ?? 0,
+                "submit" => $counts->submit ?? 0,
                 "verified" => $counts->verified ?? 0,
                 "over_due" => $counts->over_due ?? 0,
                 "open" => $counts->open ?? 0,
@@ -88,7 +90,12 @@ class PurchaseController extends Controller
     
         // Tambahkan filter berdasarkan tanggal terkini
         // $query->whereDate('date', Carbon::today());
-    
+
+        // Terapkan filter berdasarkan peran pengguna
+        if (auth()->user()->role_id == Role::USER) {
+            $query->where('user_id', auth()->user()->id);
+        }
+        
         $purchases = app(Pipeline::class)
             ->send($query)
             ->through([
