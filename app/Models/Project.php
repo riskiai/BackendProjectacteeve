@@ -21,6 +21,8 @@ class Project extends Model
     const ACTIVE = 2;
     const REJECTED = 3;
 
+    const DEFAULT_STATUS = self::PENDING;
+
     protected $table = 'projects';
 
     protected $keyType = 'string';
@@ -47,6 +49,7 @@ class Project extends Model
 
         static::creating(function ($model) {
             $model->id = 'PRO-' . date('y') . '-' . $model->generateSequenceNumber();
+            $model->status = self::DEFAULT_STATUS;
         });
     }
 
