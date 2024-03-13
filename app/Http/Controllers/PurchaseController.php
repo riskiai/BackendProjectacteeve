@@ -563,10 +563,13 @@ class PurchaseController extends Controller
 
     protected function getPph($purchase)
     {
+        // Hitung hasil PPH tanpa desimal
+        $pphResult = round((($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100);
+    
         return [
             "pph_type" => $purchase->taxPph->name,
             "pph_rate" => $purchase->taxPph->percent,
-            "pph_hasil" => (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100
+            "pph_hasil" => $pphResult
         ];
     }
 
