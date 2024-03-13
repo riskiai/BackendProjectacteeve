@@ -31,14 +31,14 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
-        if (auth()->user()->role_id == Role::USER) {
-            $query->where(function ($query) {
-                $query->where('status', Project::ACTIVE)
-                    ->whereHas('purchases', function ($query) {
-                        $query->where('user_id', auth()->user()->id);
-                    });
-            });
-        }
+        // if (auth()->user()->role_id == Role::USER) {
+        //     $query->where(function ($query) {
+        //         $query->where('status', Project::ACTIVE)
+        //             ->whereHas('purchases', function ($query) {
+        //                 $query->where('user_id', auth()->user()->id);
+        //             });
+        //     });
+        // }
         
 
 
