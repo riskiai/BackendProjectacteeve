@@ -143,23 +143,10 @@ class PurchaseCollection extends ResourceCollection
 
     protected function getPph($purchase)
     {
-        // Hilangkan tanda titik dan koma dari angka untuk membuatnya menjadi angka yang valid
-        $subTotalNumeric = str_replace(['.', ','], '', $purchase->sub_total);
-    
-        // Konversi ke tipe data float
-        $subTotalFloat = (float) $subTotalNumeric;
-    
-        // Hitung PPH
-        $pphHasil = (($subTotalFloat + $purchase->ppn) * $purchase->taxPph->percent) / 100;
-    
-        // Bulatkan PPH ke 2 angka desimal
-        $pphHasilBulat = round($pphHasil, 2);
-    
         return [
-            "jenis_pph" => $purchase->taxPph->name,
-            "tarif_pph" => $purchase->taxPph->percent,
-            "hasil_pph" => $pphHasilBulat
+            "pph_type" => $purchase->taxPph->name,
+            "pph_rate" => $purchase->taxPph->percent,
+            "pph_hasil" => (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100
         ];
     }
-    
 }
