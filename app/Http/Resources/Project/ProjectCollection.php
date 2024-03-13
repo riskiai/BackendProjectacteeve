@@ -31,7 +31,7 @@ class ProjectCollection extends ResourceCollection
                 'billing' => $project->billing,
                 'cost_estimate' => $project->cost_estimate,
                 'margin' => $project->margin,
-                'percent' => $project->percent,
+                'percent' => round($project->percent),
                 'file_attachment' => [
                     'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.' . pathinfo($project->file, PATHINFO_EXTENSION),
                     'link' => asset("storage/$project->file")
