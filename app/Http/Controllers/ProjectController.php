@@ -31,12 +31,17 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
+        // Filter berdasarkan peran pengguna
         if (auth()->user()->role_id == Role::USER) {
-            $query->where(function ($query) {
-                $query->whereHas('purchases', function ($query) {
-                    $query->where('user_id', auth()->user()->id);
-                });
+            // Jika pengguna adalah pengguna biasa (role user)
+            // Hanya menampilkan proyek yang dibuat oleh pengguna
+            $query->whereHas('purchases', function ($query) {
+                $query->where('user_id', auth()->user()->id);
             });
+        } else {
+            // Jika pengguna memiliki peran lain, seperti admin
+            // Maka tampilkan semua proyek yang aktif
+            $query->where('status', Project::ACTIVE);
         }
 
 

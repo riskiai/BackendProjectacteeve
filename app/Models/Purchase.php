@@ -51,6 +51,7 @@ class Purchase extends Model
         return $this->hasOne(Tax::class, 'id', 'pph');
     }
 
+    /* Menghitung Total Kesuluruhan */
     public function getTotalAttribute()
     {
         $total = $this->attributes['sub_total'];
