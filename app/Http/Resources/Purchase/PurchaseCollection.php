@@ -143,10 +143,14 @@ class PurchaseCollection extends ResourceCollection
 
     protected function getPph($purchase)
     {
+        $pphHasil = (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100;
+        $roundedPphHasil = round($pphHasil, 2); // Bulatkan hasil PPH ke 2 desimal
+
         return [
             "pph_type" => $purchase->taxPph->name,
             "pph_rate" => $purchase->taxPph->percent,
-            "pph_hasil" => (($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100
+            "pph_hasil" => $roundedPphHasil
         ];
     }
+
 }
