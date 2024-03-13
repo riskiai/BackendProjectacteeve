@@ -134,25 +134,32 @@ class PurchaseController extends Controller
     {
         DB::beginTransaction();
 
-         // Mendapatkan proyek yang diinginkan
-        $project = Project::find($request->project_id);
-
-        // Melakukan pengecekan jika proyek tidak ada atau statusnya tidak aktif
-        if (!$project || $project->status != Project::ACTIVE) {
-            DB::rollBack();
-            return MessageActeeve::error("Proyek tidak tersedia atau tidak aktif.");
-        }
-
-
-        $purchase = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
-        $purchaseCategory = PurchaseCategory::find($request->purchase_category_id);
-
-        $company = Company::find($request->client_id);
-        if ($company->contact_type_id != ContactType::VENDOR) {
-            return MessageActeeve::warning("this contact is not a vendor type");
-        }
-
         try {
+            // Mendapatkan proyek yang diinginkan
+            $project = null;
+
+            // Jika pembelian adalah operasional, maka tidak perlu mengambil proyek
+            if ($request->purchase_id == Purchase::TYPE_OPERATIONAL) {
+                $project = null; // Set proyek menjadi null untuk pembelian operasional
+            } else {
+                // Jika pembelian adalah event, maka cek proyek yang diinginkan
+                $project = Project::find($request->project_id);
+
+                // Melakukan pengecekan jika proyek tidak ada atau statusnya tidak aktif
+                if (!$project || $project->status != Project::ACTIVE) {
+                    DB::rollBack();
+                    return MessageActeeve::error("Proyek tidak tersedia atau tidak aktif.");
+                }
+            }
+
+            $purchase = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
+            $purchaseCategory = PurchaseCategory::find($request->purchase_category_id);
+
+            $company = Company::find($request->client_id);
+            if ($company->contact_type_id != ContactType::VENDOR) {
+                return MessageActeeve::warning("this contact is not a vendor type");
+            }
+
             $request->merge([
                 'doc_no' => $this->generateDocNo($purchase, $purchaseCategory),
                 'doc_type' => Str::upper($purchaseCategory->name),
@@ -161,6 +168,13 @@ class PurchaseController extends Controller
                 'ppn' => $request->tax_ppn,
                 'user_id' => auth()->user()->id
             ]);
+
+            // Jika pembelian adalah operasional, set project_id menjadi null
+            if ($request->purchase_id == Purchase::TYPE_OPERATIONAL) {
+                $request->merge([
+                    'project_id' => null,
+                ]);
+            }
 
             $purchase = Purchase::create($request->all());
             foreach ($request->attachment_file as $key => $file) {
@@ -174,6 +188,7 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
+
 
     public function show($docNo)
     {
@@ -565,7 +580,8 @@ class PurchaseController extends Controller
     {
         // Hitung hasil PPH tanpa desimal
         $pphResult = round((($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100);
-    
+
+        // Ubah nilai pph_hasil menjadi nilai yang dibulatkan
         return [
             "pph_type" => $purchase->taxPph->name,
             "pph_rate" => $purchase->taxPph->percent,
