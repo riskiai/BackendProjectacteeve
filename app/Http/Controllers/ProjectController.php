@@ -32,15 +32,14 @@ class ProjectController extends Controller
         $query = Project::query();
 
         if (auth()->user()->role_id == Role::USER) {
-            // Jika pengguna adalah pengguna biasa (role user)
-            // Tampilkan proyek yang aktif dan proyek yang dibuat oleh pengguna
             $query->where(function ($query) {
                 $query->where('status', Project::ACTIVE)
-                    ->orWhereHas('purchases', function ($query) {
+                    ->whereHas('purchases', function ($query) {
                         $query->where('user_id', auth()->user()->id);
                     });
             });
         }
+        
 
 
         if ($request->has('search')) {
