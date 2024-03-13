@@ -159,6 +159,7 @@ class TaxController extends Controller
                 BySearch::class
             ])
             ->thenReturn()
+            ->orderBy('date', 'desc')
             ->paginate($request->per_page);
 
         return new PurchaseCollection($purchases);
