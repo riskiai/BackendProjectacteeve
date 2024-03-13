@@ -60,13 +60,14 @@ class Purchase extends Model
             $total += $ppn;
         }
 
+       
         if ($this->attributes['pph']) {
 
-            $pph = ($total * $this->taxPph->percent) / 100;
+            $pph = ($this->attributes['sub_total'] * $this->taxPph->percent) / 100;
             $total -= $pph;
         }
-
-        return $total;
+        
+        return round($total);
     }
 
     // public function getTotalAttribute()
