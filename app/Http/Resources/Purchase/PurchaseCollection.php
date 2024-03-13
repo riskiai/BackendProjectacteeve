@@ -146,12 +146,10 @@ class PurchaseCollection extends ResourceCollection
         // Hitung hasil PPH tanpa desimal
         $pphResult = round((($purchase->sub_total + $purchase->ppn) * $purchase->taxPph->percent) / 100);
     
-        // Lakukan pembulatan dan format angka
-        $pphFormatted = number_format($pphResult, 2, '.', '');
         return [
             "pph_type" => $purchase->taxPph->name,
             "pph_rate" => $purchase->taxPph->percent,
-            "pph_hasil" => $pphFormatted
+            "pph_hasil" => $pphResult
         ];
     }
 }
