@@ -31,14 +31,20 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
-        // $query->where(function ($query) {
-        //     $query->whereHas('purchases', function ($query) {
-        //         $query->whereIn('user_id', function ($subQuery) {
-        //             $subQuery->select('id')->from('users')->where('role_id', Role::USER);
-        //         });
-        //     });
-        //     $query->orWhere('user_id', auth()->user()->id);
-        // });
+        if (auth()->user()->role_id == Role::USER) {
+            $query->where(function ($query) {
+                $query->whereHas('purchases', function ($query) {
+                    $query->where('user_id', auth()->user()->id);
+                });
+                $query->orWhere('user_id', auth()->user()->id);
+            });
+        }
+
+        if (auth()->user()->role_id != Role::USER) {
+            // Tidak ada pembatasan, tampilkan semua proyek
+            $query->whereNotNull('id'); // Ini hanya contoh pembatasan yang selalu benar
+        }
+        
 
         if ($request->has('search')) {
             $query->where(function ($query) use ($request) {
