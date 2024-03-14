@@ -30,12 +30,13 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
         $query = Project::query();
-        
+
         if (auth()->user()->role_id == Role::USER) {
             $query->whereHas('purchases.project', function ($query) {
                 // Tampilkan semua proyek yang aktif
-                $query->where('status', Project::ACTIVE);
-            })->where('user_id', auth()->user()->id);
+                $query->where('status', Project::ACTIVE)
+                    ->where('user_id', auth()->user()->id);
+            });
         } else {
             // Jika bukan pengguna biasa, tampilkan semua proyek
             $query->whereNotNull('id'); // Ini hanya contoh pembatasan yang selalu benar
