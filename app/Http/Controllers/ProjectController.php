@@ -32,7 +32,7 @@ class ProjectController extends Controller
         $query = Project::query();
 
         if (auth()->user()->role_id == Role::USER) {
-            $query->where('status', Project::ACTIVE)
+            // $query->where('status', Project::ACTIVE)
                 ->where(function ($query) {
                     $query->whereHas('purchases', function ($query) {
                         $query->where('user_id', auth()->user()->id);
