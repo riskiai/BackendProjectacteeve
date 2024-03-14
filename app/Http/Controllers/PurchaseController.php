@@ -96,6 +96,15 @@ class PurchaseController extends Controller
         if (auth()->user()->role_id == Role::USER) {
             $query->where('user_id', auth()->user()->id);
         }
+
+        // Terapkan filter berdasarkan peran pengguna
+        if (auth()->user()->role_id == Role::USER) {
+            // Ambil semua proyek yang aktif terkait dengan pembelian
+            $query->whereHas('project', function ($query) {
+                $query->where('status', Project::ACTIVE);
+            });
+        }
+        
         
         $purchases = app(Pipeline::class)
             ->send($query)
