@@ -92,9 +92,11 @@ class PurchaseController extends Controller
         // Tambahkan filter berdasarkan tanggal terkini
         // $query->whereDate('date', Carbon::today());
 
-        // Terapkan filter berdasarkan peran pengguna
+         // Terapkan filter berdasarkan peran pengguna
         if (auth()->user()->role_id == Role::USER) {
-            $query->where('user_id', auth()->user()->id);
+            $query->whereHas('project', function ($query) {
+                $query->where('status', Project::ACTIVE);
+            });
         }
         
         $purchases = app(Pipeline::class)
