@@ -31,11 +31,14 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
-        if (auth()->user()->role_id == Role::USER) {
-            // Jika pengguna adalah pengguna biasa, hanya tampilkan proyek yang dibuat oleh pengguna tersebut
-            $query->where('user_id', auth()->user()->id);
-        }
-    
+        $query->where(function ($query) {
+            $query->whereHas('purchases', function ($query) {
+                $query->whereIn('user_id', function ($subQuery) {
+                    $subQuery->select('id')->from('users')->where('role_id', Role::USER);
+                });
+            });
+            $query->orWhere('user_id', auth()->user()->id);
+        });
 
         if ($request->has('search')) {
             $query->where(function ($query) use ($request) {
