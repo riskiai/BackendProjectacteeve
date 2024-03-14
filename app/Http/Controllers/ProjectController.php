@@ -33,18 +33,20 @@ class ProjectController extends Controller
 
         $query->where(function ($query) {
             if (auth()->user()->role_id == Role::USER) {
-                // Jika pengguna adalah 'USER', tampilkan semua proyek yang aktif di pembelian
-                $query->whereHas('purchases.project', function ($query) {
-                    $query->where('status', Project::ACTIVE)
-                        ->where('user_id', auth()->user()->id);
+                // Jika pengguna adalah 'USER', tampilkan semua proyek yang aktif di pembelian dan proyek yang dibuat oleh pengguna saat ini
+                $query->where(function ($query) {
+                    $query->whereHas('purchases.project', function ($query) {
+                        $query->where('status', Project::ACTIVE)
+                            ->where('user_id', auth()->user()->id);
+                    });
+                    $query->orWhere('user_id', auth()->user()->id);
                 });
-                // Juga tampilkan proyek yang dibuat oleh pengguna saat ini
-                $query->orWhere('user_id', auth()->user()->id);
             } else {
                 // Jika bukan pengguna biasa, tampilkan semua proyek
                 $query->whereNotNull('id');
             }
         });
+        
         
         if ($request->has('search')) {
             $query->where(function ($query) use ($request) {
