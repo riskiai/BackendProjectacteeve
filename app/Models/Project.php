@@ -63,11 +63,11 @@ class Project extends Model
         return $nextNumber;
     }
 
-    public function user(): BelongsTo
+    public function user(): HasOne
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
-
+    
     public function company(): HasOne
     {
         return $this->hasOne(Company::class, 'id', 'company_id');
