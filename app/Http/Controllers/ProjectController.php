@@ -31,18 +31,18 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
-        if (auth()->user()->role_id == Role::USER) {
-            $query->whereHas('purchases.project', function ($query) {
-                // Tampilkan semua proyek yang aktif
-                $query->where('status', Project::ACTIVE)
-                    ->where('user_id', auth()->user()->id);
-            });
-        } else {
-            // Jika bukan pengguna biasa, tampilkan semua proyek
-            $query->whereNotNull('id'); // Ini hanya contoh pembatasan yang selalu benar
-        }
-        
-        
+        $query->where(function ($query) {
+            if (auth()->user()->role_id == Role::USER) {
+                // Menampilkan semua proyek yang aktif untuk pembelian
+                $query->whereHas('purchases.project', function ($query) {
+                    $query->where('status', Project::ACTIVE)
+                          ->where('user_id', auth()->user()->id);
+                });
+            } else {
+                // Menampilkan semua proyek jika bukan pengguna biasa
+                $query->whereNotNull('id');
+            }
+        });        
         
 
         if ($request->has('search')) {
