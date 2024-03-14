@@ -83,6 +83,28 @@ class ProjectController extends Controller
         return new ProjectCollection($projects);
     }
 
+    public function projectall(Request $request) {
+
+        $query = Project::query();
+
+         // Filter berdasarkan status project
+         if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('date')) {
+            $date = str_replace(['[', ']'], '', $request->date);
+            $date = explode(", ", $date);
+
+            $query->whereBetween('created_at', $date);
+        }
+
+        $projects = $query->orderBy('created_at', 'desc')->paginate($request->per_page);
+
+        return new ProjectCollection($projects);
+
+    }
+
     public function counting(Request $request)
     {
         $query = Project::query();
