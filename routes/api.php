@@ -76,7 +76,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     // end point project resource
-    Route::get('/', [ProjectController::class, 'projectall']);
+    Route::get('projectall', [ProjectController::class, 'projectall']);
     Route::get('project/counting', [ProjectController::class, 'counting']); // buat kotak besaar
     Route::get('project/invoice/{id}', [ProjectController::class, 'invoice']); // Buat Transaction
     Route::put('project/accept/{id}', [ProjectController::class, 'accept']); // Buat Transaction
