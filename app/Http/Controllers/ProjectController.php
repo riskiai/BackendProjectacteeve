@@ -32,7 +32,7 @@ class ProjectController extends Controller
         $query = Project::query();
 
         if (auth()->user()->role_id == Role::USER) {
-            $query->whereHas('project', function ($query) {
+            $query->whereHas('purchases.project', function ($query) {
                 // Tampilkan semua proyek yang aktif
                 $query->where('status', Project::ACTIVE);
             });
@@ -40,6 +40,7 @@ class ProjectController extends Controller
             // Jika bukan pengguna biasa, tampilkan semua proyek
             $query->whereNotNull('id'); // Ini hanya contoh pembatasan yang selalu benar
         }
+        
         
         
 
