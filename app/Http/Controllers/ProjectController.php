@@ -33,9 +33,10 @@ class ProjectController extends Controller
 
         // Jika peran pengguna adalah 'USER'
         if (auth()->user()->role_id == Role::USER) {
-            $query->where('user_id', auth()->user()->id);
+            $query->whereHas('purchases', function ($query) {
+                $query->where('user_id', auth()->user()->id);
+            });
         } 
-        
 
         if ($request->has('search')) {
             $query->where(function ($query) use ($request) {
