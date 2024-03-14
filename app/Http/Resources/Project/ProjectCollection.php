@@ -18,7 +18,7 @@ class ProjectCollection extends ResourceCollection
     {
         $data = [];
 
-        foreach ($this as $project) {
+        foreach ($this as $key => $project) {
             $data[] = [
                 'id' => $project->id,
                 'client' => [
@@ -41,6 +41,13 @@ class ProjectCollection extends ResourceCollection
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
             ];
+
+            if ($project->user) {
+                $data[$key]['created_by'] = [
+                    "id" => $project->user->id,
+                    "name" => $project->user->name,
+                ];
+            }
         }
 
         return $data;

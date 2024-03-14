@@ -185,8 +185,11 @@ class ProjectController extends Controller
         try {
             $request->merge([
                 'company_id' => $company->id,
+                // 'user_id' => auth()->user()->id,
                 'file' => $request->file('attachment_file')->store(Project::ATTACHMENT_FILE)
             ]);
+
+            $request->merge(['user_id' => auth()->user()->id]);
 
             $project = Project::create($request->all());
 

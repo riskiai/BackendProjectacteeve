@@ -40,6 +40,7 @@ class Project extends Model
         'status_cost_progress',
         'file',
         'status',
+        'user_id',
     ];
 
 
@@ -67,7 +68,7 @@ class Project extends Model
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
-    
+
     public function company(): HasOne
     {
         return $this->hasOne(Company::class, 'id', 'company_id');
