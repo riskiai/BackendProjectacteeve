@@ -31,11 +31,12 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
-        if (auth()->user()->role_id == Role::USER) {
+       /*  
+            if (auth()->user()->role_id == Role::USER) {
             $query->whereHas('purchases', function ($query) {
                 $query->where('user_id', auth()->user()->id);
             })->orWhere('user_id', auth()->user()->id); // Gabungkan kedua kondisi
-        }
+        } */
 
         if ($request->has('search')) {
             $query->where(function ($query) use ($request) {
