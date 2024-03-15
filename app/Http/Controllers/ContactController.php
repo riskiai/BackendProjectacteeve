@@ -57,7 +57,7 @@ class ContactController extends Controller
 
 
         // keluaran dari index ini merupakan paginate
-        $contacts = $query->paginate($request->per_page ?? 28);
+        $contacts = $query->paginate($request->per_page ?? 30);
 
         // untuk index pengelolaan datanya terpisah file
         // untuk mempertahankan filtering bawaan paginate laravel
