@@ -152,7 +152,7 @@ class PurchaseController extends Controller
                 }
             }
 
-            $purchase = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
+            $purchaseMax = Purchase::where('purchase_category_id', $request->purchase_category_id)->max('doc_no');
             $purchaseCategory = PurchaseCategory::find($request->purchase_category_id);
 
             $company = Company::find($request->client_id);
@@ -161,7 +161,7 @@ class PurchaseController extends Controller
             }
 
             $request->merge([
-                'doc_no' => $this->generateDocNo($purchase, $purchaseCategory),
+                'doc_no' => $this->generateDocNo($purchaseMax, $purchaseCategory),
                 'doc_type' => Str::upper($purchaseCategory->name),
                 'purchase_status_id' => PurchaseStatus::AWAITING,
                 'company_id' => $company->id,
