@@ -26,15 +26,17 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         $request = [
-            'purchase_id' => 'required|in:1,2',
+            'purchase_id' => 'nullable|in:1,2',
             'purchase_category_id' => 'nullable|exists:purchase_category,id',
-            'client_id' => 'required|exists:companies,id',
+            'client_id' => 'nullable|exists:companies,id',
             'tax_ppn' => 'nullable|string',
-            'sub_total' => 'required|numeric',
+            'sub_total' => 'nullable|numeric',
             'attachment_file' => 'array',
             'attachment_file.*' => 'mimes:pdf,png,jpg|max:3072',
-            'date' => 'required|date',
-            'due_date' => 'required|date',
+            'date' => 'nullable|date',
+            'due_date' => 'nullable|date',
+            "created_at" => 'nullable|date',
+            "updated_at" => 'nullable|date',
         ];
 
         if (request()->purchase_id == 1) {

@@ -99,7 +99,7 @@ class ProjectController extends Controller
             $query->whereBetween('created_at', $date);
         }
 
-        $projects = $query->orderBy('created_at', 'desc')->simplePaginate($request->per_page ?? 30);
+        $projects = $query->orderBy('created_at', 'desc')->get();
 
         return new ProjectCollection($projects);
 

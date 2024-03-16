@@ -42,10 +42,13 @@ class Purchase extends Model
         'due_date',
         'reject_note',
         'user_id',
+        // 'updated_at',
     ];
 
     protected $dates = ['created_at', 'updated_at'];
 
+    // public $timestamps = true;
+    
     public function taxPph(): HasOne
     {
         return $this->hasOne(Tax::class, 'id', 'pph');

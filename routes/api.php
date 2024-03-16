@@ -71,6 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // end point contact resource data
+    Route::get('contactall', [ContactController::class, 'contactall']);
     Route::get('contact', [ContactController::class, 'showByContactType']);
     Route::apiResource('contact', ContactController::class);
 
@@ -95,6 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('purchase/reject/{id}', [PurchaseController::class, 'reject']);
     Route::put('purchase/request/{id}', [PurchaseController::class, 'request']);
     Route::put('purchase/payment/{id}', [PurchaseController::class, 'payment']);
+    Route::put('purchase/updatepayment/{id}', [PurchaseController::class, 'updatepayment']);
     Route::delete('purchase/delete-document/{id}', [PurchaseController::class, 'deleteDocument']);
     Route::apiResource('purchase', PurchaseController::class);
 });

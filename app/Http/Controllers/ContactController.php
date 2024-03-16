@@ -57,7 +57,52 @@ class ContactController extends Controller
 
 
         // keluaran dari index ini merupakan paginate
-        $contacts = $query->paginate($request->per_page ?? 30);
+        $contacts = $query->paginate($request->per_page ?? 10);
+
+        // untuk index pengelolaan datanya terpisah file
+        // untuk mempertahankan filtering bawaan paginate laravel
+        // pembuatan file bisa menggunakan command `php artisan make:resource NamaFile`
+        return new ContactCollection($contacts);
+    }
+
+
+    public function contactall(Request $request)
+    {
+        // inisiasi company/contact dalam bentuk query, supaya bisa dilakukan untuk filtering
+        $query = Company::query();
+
+        if ($request->has('contact_type')) {
+            $query->where('contact_type_id', $request->contact_type);
+        }
+
+        // pembuatan kondisi ketika params search
+        if ($request->has('search')) {
+            // maka lakukan query bersarang seperti dibawah ini
+            // $query->where(func...{}) => query akan berjalan jika kondisi didalamnya terpenuhi
+            $query->where(function ($query) use ($request) {
+                // query ini digunakan untuk filtering data
+                $query->where('name', 'like', "%$request->search%")
+                    ->orWhere('pic_name', 'like', "%$request->search%")
+                    ->orWhere('phone', 'like', "%$request->search%")
+                    ->orWhere('bank_name', 'like', "%$request->search%")
+                    ->orWhere('account_name', 'like', "%$request->search%")
+                    ->orWhere('account_number', 'like', "%$request->search%")
+                    ->orWhereHas('contactType', function ($query) use ($request) { // query ini digunakan jika ada yang mencari ke arah relasinya, artinya sama seperti baris ke 26
+                        $query->where('name', 'like', "%$request->search%");
+                    });
+            });
+        }
+
+        if ($request->has('date')) {
+            $date = str_replace(['[', ']'], '', $request->date);
+            $date = explode(", ", $date);
+
+            $query->whereBetween('created_at', $date);
+        }
+
+
+        // keluaran dari index ini merupakan paginate
+        $contacts = $query->get();
 
         // untuk index pengelolaan datanya terpisah file
         // untuk mempertahankan filtering bawaan paginate laravel

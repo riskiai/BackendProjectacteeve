@@ -220,8 +220,8 @@ class PurchaseController extends Controller
                 "ppn" => $this->getPpn($purchase),
                 "log" => $purchase->logs()->select('name', 'created_at')->where('note_reject', null)->latest()->first(),
                 "logs_rejected" => $purchase->logs()->select('name', 'note_reject', 'created_at')->where('note_reject', '!=', null)->orderBy('id', 'desc')->get(),
-                "created_at" => $purchase->created_at,
-                "updated_at" => $purchase->updated_at,
+                "created_at" => $purchase->created_at->format('Y-m-d'),
+                "updated_at" => $purchase->updated_at->format('Y-m-d'),  
             ];
 
         if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
@@ -421,6 +421,7 @@ class PurchaseController extends Controller
         try {
             $purchase->logs()->updateOrCreate([
                 'tab' => Purchase::TAB_PAID,
+                // 'note_reject' => $request->note,
                 'name' => auth()->user()->name
             ], [
                 'name' => auth()->user()->name
@@ -438,6 +439,38 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
+
+    public function updatepayment(Request $request, $docNo)
+    {
+    DB::beginTransaction();
+
+    try {
+        // Ubah pengecekan model menjadi berdasarkan doc_no
+        $purchase = Purchase::whereDocNo($docNo)->first();
+        if (!$purchase) {
+            return MessageActeeve::notFound('Data not found!');
+        }
+
+        $purchase->logs()->create([
+            'tab' => Purchase::TAB_PAID,
+            'name' => auth()->user()->name,
+            'updated_at' => $request->updated_at
+        ]);
+
+        Purchase::whereDocNo($docNo)->update([
+            'purchase_status_id' => PurchaseStatus::PAID,
+            'updated_at' => $request->updated_at,
+            'tab' => Purchase::TAB_PAID
+        ]);
+
+        DB::commit();
+        return MessageActeeve::success("Purchase $docNo payment successfully");
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        return MessageActeeve::error($th->getMessage());
+    }
+}
+
 
     public function undo($docNo)
     {
