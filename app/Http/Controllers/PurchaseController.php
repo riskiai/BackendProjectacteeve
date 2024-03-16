@@ -224,6 +224,13 @@ class PurchaseController extends Controller
                 "updated_at" => $purchase->updated_at->format('Y-m-d'),  
             ];
 
+            if ($purchase->user) {
+                $data['created_by'] = [
+                    "id" => $purchase->user->id,
+                    "name" => $purchase->user->name,
+                ];
+            }
+
         if ($purchase->purchase_id == Purchase::TYPE_EVENT) {
             $data['project'] = [
                 "id" => $purchase->project->id,
