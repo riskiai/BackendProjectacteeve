@@ -35,11 +35,11 @@ class UpdateRequest extends FormRequest
             'currency' => 'nullable|max:255',
             'account_number' => 'nullable|numeric',
             'swift_code' => 'nullable|max:255',
-            'attachment_npwp' => 'nullable|mimes:pdf,png,jpg|max:3072',
+            'attachment_npwp' => 'nullable|mimes:pdf,png,jpg,xlsx,xls|max:3072',
             'pic_name' => 'required|max:255',
             'phone' => 'nullable|numeric',
             'email' => 'nullable|email|max:255',
-            'attachment_file' => 'nullable|mimes:pdf,png,jpg|max:3072',
+            'attachment_file' => 'nullable|mimes:pdf,png,jpg,xlsx,xls|max:3072',
         ];
     }
 

@@ -32,7 +32,7 @@ class CreateRequest extends FormRequest
             'tax_ppn' => 'nullable|string',
             'sub_total' => 'required|numeric',
             'attachment_file' => 'array',
-            'attachment_file.*' => 'required|mimes:pdf,png,jpg|max:3072',
+            'attachment_file.*' => 'required|mimes:pdf,png,jpg,xlsx,xls|max:3072',
             'date' => 'required|date',
             'due_date' => 'required|date',
         ];
