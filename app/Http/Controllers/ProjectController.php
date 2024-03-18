@@ -220,7 +220,7 @@ class ProjectController extends Controller
             'billing' => $project->billing,
             'cost_estimate' => $project->cost_estimate,
             'margin' => $project->margin,
-            'percent' => round($project->percent),
+            'percent' => round($project->percent, 2),
             'file_attachment' => [
                 'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.' . pathinfo($project->file, PATHINFO_EXTENSION),
                 'link' => asset("storage/$project->file")
