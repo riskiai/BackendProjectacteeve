@@ -9,17 +9,25 @@ class ByTax
 {
     public function handle(Builder $query, Closure $next)
     {
-        if (!request()->has('tax')) {
+        if (!request()->has('tax') && !request()->has('pph_name')) {
             return $next($query);
         }
-
+        
         $query->where(function ($query) {
-            $query->whereHas('taxPpn', function ($query) {
-                $query->where('type', request('tax'));
-            });
-            $query->orWhereHas('taxPph', function ($query) {
-                $query->where('type', request('tax'));
-            });
+            if (request()->has('tax')) {
+                $query->whereHas('taxPpn', function ($query) {
+                    $query->where('type', request('tax'));
+                });
+                $query->orWhereHas('taxPph', function ($query) {
+                    $query->where('type', request('tax'));
+                });
+            }
+
+            if (request()->has('pph_name')) {
+                $query->whereHas('taxPph', function ($query) {
+                    $query->where('name', request('pph_name'));
+                });
+            }
         });
 
         return $next($query);
