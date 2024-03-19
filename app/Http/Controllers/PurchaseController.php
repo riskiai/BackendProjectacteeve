@@ -30,6 +30,7 @@ use App\Http\Requests\Purchase\AcceptRequest;
 use App\Http\Requests\Purchase\CreateRequest;
 use App\Http\Requests\Purchase\UpdateRequest;
 use App\Facades\Filters\Purchase\ByPurchaseID;
+use App\Facades\Filters\Purchase\ByUpdated;
 use App\Http\Resources\Purchase\PurchaseCounting;
 use App\Http\Resources\Purchase\PurchaseCollection;
 
@@ -101,6 +102,7 @@ class PurchaseController extends Controller
             ->send($query)
             ->through([
                 ByDate::class,
+                ByUpdated::class,
                 ByPurchaseID::class,
                 ByTab::class,
                 ByStatus::class,
