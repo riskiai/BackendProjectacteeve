@@ -159,6 +159,7 @@ class TaxController extends Controller
                 BySearch::class
             ])
             ->thenReturn()
+            ->whereNotNull('ppn')
             ->orderBy('date', 'desc')
             ->paginate($request->per_page);
 
@@ -167,12 +168,7 @@ class TaxController extends Controller
 
     protected function getPpn($purchase)
     {
-        // Cek apakah nilai PPN tidak diisi atau 0
-        if ($purchase->ppn === null || $purchase->ppn == 0) {
-                return 0;
-            } else {
-                return ($purchase->sub_total * $purchase->ppn) / 100;
-        }
+        return ($purchase->sub_total * $purchase->ppn) / 100;
     }
 
     protected function getDocument($documents)

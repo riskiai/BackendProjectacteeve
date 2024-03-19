@@ -138,13 +138,7 @@ class PurchaseCollection extends ResourceCollection
 
     protected function getPpn($purchase)
     {
-        // Cek apakah nilai PPN tidak diisi atau 0
-        if ($purchase->ppn === null || $purchase->ppn == 0) {
-            return 0;
-        } else {
-            return ($purchase->sub_total * $purchase->ppn) / 100;
-         }
-
+        return ($purchase->sub_total * $purchase->ppn) / 100;
     }
 
     protected function getPph($purchase)
