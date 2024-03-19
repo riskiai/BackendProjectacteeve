@@ -13,10 +13,11 @@ class ByDate
             return $next($query);
         }
 
-        $request = str_replace(['[', ']'], '', request('date'));
-        $request = explode(", ", $request);
+        $dates = explode(", ", str_replace(['[', ']'], '', request('date')));
+        $startDate = $dates[0];
+        $endDate = $dates[1];
 
-        $query->whereBetween('created_at', $request);
+        $query->whereBetween('created_at', [$startDate, $endDate]);
 
         return $next($query);
     }

@@ -148,10 +148,10 @@ class TaxController extends Controller
         $purchases = app(Pipeline::class)
             ->send($query)
             ->through([
+                ByDate::class,
                 InTaxReport::class,
                 ByPurchaseID::class,
                 ByTab::class,
-                ByDate::class,
                 ByStatus::class,
                 ByVendor::class,
                 ByProject::class,
