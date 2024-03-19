@@ -74,8 +74,8 @@ class ProjectController extends Controller
         if ($request->has('date')) {
             $date = str_replace(['[', ']'], '', $request->date);
             $date = explode(", ", $date);
-
-            $query->whereBetween('created_at', $date);
+        
+            $query->whereBetween('created_at', $date); // Ganti 'created_at' sesuai dengan kolom yang sesuai
         }
 
         $projects = $query->orderBy('created_at', 'desc')->paginate($request->per_page);
