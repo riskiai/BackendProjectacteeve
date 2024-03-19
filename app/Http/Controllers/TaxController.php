@@ -159,7 +159,10 @@ class TaxController extends Controller
                 BySearch::class
             ])
             ->thenReturn()
-            ->whereNotNull('ppn')
+            ->where(function ($query) {
+                $query->whereNotNull('ppn')
+                    ->where('ppn', '>', 0); 
+            })
             ->orderBy('date', 'desc')
             ->paginate($request->per_page);
 
