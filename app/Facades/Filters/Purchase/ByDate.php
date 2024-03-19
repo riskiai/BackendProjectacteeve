@@ -17,7 +17,7 @@ class ByDate
         $startDate = $dates[0];
         $endDate = $dates[1];
 
-        $query->whereBetween('created_at', [$startDate, $endDate]);
+        $query->whereBetween('date', [$startDate, $endDate]);
 
         return $next($query);
     }
