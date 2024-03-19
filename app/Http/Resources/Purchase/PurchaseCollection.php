@@ -138,11 +138,7 @@ class PurchaseCollection extends ResourceCollection
 
     protected function getPpn($purchase)
     {
-        if ($purchase->ppn) {
-            return round(($purchase->sub_total * $purchase->ppn) / 100);
-        } else {
-            return 0;
-        }
+        return ($purchase->sub_total * $purchase->ppn) / 100;
     }
 
     protected function getPph($purchase)
