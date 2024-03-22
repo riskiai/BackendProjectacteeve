@@ -97,6 +97,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('purchase/request/{id}', [PurchaseController::class, 'request']);
     Route::put('purchase/payment/{id}', [PurchaseController::class, 'payment']);
     Route::put('purchase/updatepayment/{id}', [PurchaseController::class, 'updatepayment']);
+    Route::put('purchase/updateproject/{id}', [PurchaseController::class, 'updateproject']);
     Route::delete('purchase/delete-document/{id}', [PurchaseController::class, 'deleteDocument']);
     Route::apiResource('purchase', PurchaseController::class);
 });

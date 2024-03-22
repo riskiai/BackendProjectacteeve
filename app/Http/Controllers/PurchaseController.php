@@ -451,36 +451,77 @@ class PurchaseController extends Controller
 
     public function updatepayment(Request $request, $docNo)
     {
-    DB::beginTransaction();
+        DB::beginTransaction();
 
-    try {
-        // Ubah pengecekan model menjadi berdasarkan doc_no
-        $purchase = Purchase::whereDocNo($docNo)->first();
-        if (!$purchase) {
-            return MessageActeeve::notFound('Data not found!');
+        try {
+            // Ubah pengecekan model menjadi berdasarkan doc_no
+            $purchase = Purchase::whereDocNo($docNo)->first();
+            if (!$purchase) {
+                return MessageActeeve::notFound('Data not found!');
+            }
+
+            $purchase->logs()->create([
+                'tab' => Purchase::TAB_PAID,
+                'name' => auth()->user()->name,
+                'updated_at' => $request->updated_at
+            ]);
+
+            Purchase::whereDocNo($docNo)->update([
+                'purchase_status_id' => PurchaseStatus::PAID,
+                'updated_at' => $request->updated_at,
+                'tab' => Purchase::TAB_PAID
+            ]);
+
+            DB::commit();
+            return MessageActeeve::success("Purchase $docNo payment successfully");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }   
+    }
+
+    public function updateproject(Request $request, $docNo)
+        {
+            DB::beginTransaction();
+
+            try {
+                // Ubah pengecekan model menjadi berdasarkan doc_no
+                $purchase = Purchase::whereDocNo($docNo)->first();
+                if (!$purchase) {
+                    return MessageActeeve::notFound('Data not found!');
+                }
+
+                // Dapatkan proyek yang terkait dengan pembelian
+                $project = Project::find($request->project_id);
+
+                // Periksa apakah proyek ada dan aktif
+                if (!$project || $project->status != Project::ACTIVE) {
+                    DB::rollBack();
+                    return MessageActeeve::error("Proyek tidak tersedia atau tidak aktif.");
+                }
+
+                // Tambahkan log pembayaran
+                $purchase->logs()->create([
+                    'tab' => Purchase::TAB_PAID,
+                    'name' => auth()->user()->name,
+                    'project_id' => $request->input('project_id'),
+                ]);
+
+                Purchase::whereDocNo($docNo)->update([
+                    'purchase_status_id' => PurchaseStatus::PAID,
+                    'project_id' => $request->input('project_id'),
+                    'tab' => Purchase::TAB_PAID
+                ]);
+
+                DB::commit();
+                return MessageActeeve::success("Project ID for Purchase $docNo updated successfully");
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return MessageActeeve::error($th->getMessage());
+            }   
         }
 
-        $purchase->logs()->create([
-            'tab' => Purchase::TAB_PAID,
-            'name' => auth()->user()->name,
-            'updated_at' => $request->updated_at
-        ]);
-
-        Purchase::whereDocNo($docNo)->update([
-            'purchase_status_id' => PurchaseStatus::PAID,
-            'updated_at' => $request->updated_at,
-            'tab' => Purchase::TAB_PAID
-        ]);
-
-        DB::commit();
-        return MessageActeeve::success("Purchase $docNo payment successfully");
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        return MessageActeeve::error($th->getMessage());
-    }
-}
-
-
+    
     public function undo($docNo)
     {
         DB::beginTransaction();
