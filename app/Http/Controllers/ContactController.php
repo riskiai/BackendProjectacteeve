@@ -156,8 +156,10 @@ class ContactController extends Controller
             return MessageActeeve::notFound('data not found!');
         }
 
-        // untuk tidak menggunakan file terpisah
-        // karena belum ada kebutuhan khusus seperti index
+        // Mengambil URL attachment_npwp dan attachment_file hanya jika file tersebut ada
+        $attachment_npwp = $contact->npwp ? asset("storage/$contact->npwp") : '';
+        $attachment_file = $contact->file ? asset("storage/$contact->file") : '';
+
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
@@ -170,11 +172,11 @@ class ContactController extends Controller
                 ],
                 "name" => $contact->name,
                 "address" => $contact->address,
-                "attachment_npwp" => asset("storage/$contact->npwp"),
+                "attachment_npwp" => $attachment_npwp,
                 "pic_name" => $contact->pic_name,
                 "phone" => $contact->phone,
                 "email" => $contact->email,
-                "attachment_file" => asset("storage/$contact->file"),
+                "attachment_file" => $attachment_file,
                 "bank_name" => $contact->bank_name,
                 "branch" => $contact->branch,
                 "account_name" => $contact->account_name,
@@ -186,6 +188,7 @@ class ContactController extends Controller
             ]
         ]);
     }
+
 
     public function showByContactType(Request $request)
     {

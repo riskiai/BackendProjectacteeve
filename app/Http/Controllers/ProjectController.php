@@ -218,7 +218,17 @@ class ProjectController extends Controller
         if (!$project) {
             return MessageActeeve::notFound('data not found!');
         }
-
+    
+        $file_attachment = null;
+    
+        // Periksa apakah ada file attachment
+        if ($project->file) {
+            $file_attachment = [
+                'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.' . pathinfo($project->file, PATHINFO_EXTENSION),
+                'link' => asset("storage/$project->file")
+            ];
+        }
+    
         return MessageActeeve::render([
             'id' => $project->id,
             'client' => [
@@ -232,16 +242,14 @@ class ProjectController extends Controller
             'cost_estimate' => $project->cost_estimate,
             'margin' => $project->margin,
             'percent' => round($project->percent, 2),
-            'file_attachment' => [
-                'name' => date('Y', strtotime($project->created_at)) . '/' . $project->id . '.' . pathinfo($project->file, PATHINFO_EXTENSION),
-                'link' => asset("storage/$project->file")
-            ],
+            'file_attachment' => $file_attachment,
             'cost_progress' => $this->costProgress($project),
             'status' => $this->getStatus($project->status),
             'created_at' => $project->created_at,
             'updated_at' => $project->updated_at,
         ]);
     }
+    
 
     public function invoice(Request $request, $id)
     {
