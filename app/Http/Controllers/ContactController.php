@@ -117,30 +117,30 @@ class ContactController extends Controller
      * @return void
      */
     public function store(StoreRequest $request)
-{
-    DB::beginTransaction();
+    {
+        DB::beginTransaction();
 
-    $contactType = ContactType::find($request->contact_type);
+        $contactType = ContactType::find($request->contact_type);
 
-    try {
-        // fungsi ini digunakan untuk menggabungkan key:value baru kedalam request yang sudah ada
-        $npwpPath = $request->file('attachment_npwp')->store(Company::ATTACHMENT_NPWP);
-        $filePath = $request->hasFile('attachment_file') ? $request->file('attachment_file')->store(Company::ATTACHMENT_FILE) : null;
+        try {
+            // fungsi ini digunakan untuk menggabungkan key:value baru kedalam request yang sudah ada
+            $npwpPath = $request->file('attachment_npwp')->store(Company::ATTACHMENT_NPWP);
+            $filePath = $request->hasFile('attachment_file') ? $request->file('attachment_file')->store(Company::ATTACHMENT_FILE) : null;
 
-        $requestData = $request->all();
-        $requestData['contact_type_id'] = $contactType->id;
-        $requestData['npwp'] = $npwpPath;
-        $requestData['file'] = $filePath;
+            $requestData = $request->all();
+            $requestData['contact_type_id'] = $contactType->id;
+            $requestData['npwp'] = $npwpPath;
+            $requestData['file'] = $filePath;
 
-        $contact = Company::create($requestData);
+            $contact = Company::create($requestData);
 
-        DB::commit();
-        return MessageActeeve::success("contact $contact->name has been created");
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        return MessageActeeve::error($th->getMessage());
+            DB::commit();
+            return MessageActeeve::success("contact $contact->name has been created");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
     }
-}
 
 
     /**

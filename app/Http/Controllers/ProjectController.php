@@ -183,15 +183,25 @@ class ProjectController extends Controller
         }
 
         try {
-            $request->merge([
+            // Persiapkan data yang akan disimpan
+            $data = [
+                'name' => $request->name,
+                'billing' => $request->billing,
+                'cost_estimate' => $request->cost_estimate,
+                'margin' => $request->margin,
+                'percent' => $request->percent,
+                'date' => $request->date,
                 'company_id' => $company->id,
-                // 'user_id' => auth()->user()->id,
-                'file' => $request->file('attachment_file')->store(Project::ATTACHMENT_FILE)
-            ]);
+                'user_id' => auth()->user()->id,
+            ];
 
-            $request->merge(['user_id' => auth()->user()->id]);
+            // Periksa apakah file dilampirkan sebelum menyimpannya
+            if ($request->hasFile('attachment_file')) {
+                $data['file'] = $request->file('attachment_file')->store(Project::ATTACHMENT_FILE);
+            }
 
-            $project = Project::create($request->all());
+            // Buat proyek dengan data yang sudah disiapkan
+            $project = Project::create($data);
 
             DB::commit();
             return MessageActeeve::success("project $project->name has been created");
@@ -200,6 +210,7 @@ class ProjectController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
+
 
     public function show($id)
     {
