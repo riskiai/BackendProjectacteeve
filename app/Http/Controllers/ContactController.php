@@ -157,8 +157,8 @@ class ContactController extends Controller
         }
 
         // Mengambil URL attachment_npwp dan attachment_file hanya jika file tersebut ada
-        $attachment_npwp = $contact->npwp ? asset("storage/$contact->npwp") : '';
-        $attachment_file = $contact->file ? asset("storage/$contact->file") : '';
+        $attachment_npwp = $contact->npwp ? asset("storage/$contact->npwp") : null;
+        $attachment_file = $contact->file ? asset("storage/$contact->file") : null;
 
         return MessageActeeve::render([
             'status' => MessageActeeve::SUCCESS,
