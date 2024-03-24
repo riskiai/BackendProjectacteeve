@@ -31,11 +31,15 @@ class CreateRequest extends FormRequest
             'client_id' => 'required|exists:companies,id',
             'tax_ppn' => 'nullable|string',
             'sub_total' => 'required|numeric',
-            'attachment_file' => 'array',
-            'attachment_file.*' => 'required|mimes:pdf,png,jpg,xlsx,xls|max:3072',
+            // 'attachment_file' => 'nullable|array', 
             'date' => 'required|date',
             'due_date' => 'required|date',
         ];
+
+        if ($this->hasFile('attachment_file')) {
+            $request['attachment_file'] = 'array';
+            $request['attachment_file.*'] = 'nullable|mimes:pdf,png,jpg,xlsx,xls|max:3072';
+        }
 
         if (request()->purchase_id == 1) {
             $request['project_id'] = 'nullable|exists:projects,id';

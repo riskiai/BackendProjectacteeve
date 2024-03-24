@@ -179,8 +179,12 @@ class PurchaseController extends Controller
             }
 
             $purchase = Purchase::create($request->all());
-            foreach ($request->attachment_file as $key => $file) {
-                $this->saveDocument($purchase, $file, $key + 1);
+
+            // Periksa apakah ada file yang dilampirkan sebelum melakukan iterasi foreach
+            if ($request->hasFile('attachment_file')) {
+                foreach ($request->file('attachment_file') as $key => $file) {
+                    $this->saveDocument($purchase, $file, $key + 1);
+                }
             }
 
             DB::commit();
@@ -190,6 +194,7 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
+
 
 
     public function show($docNo)
