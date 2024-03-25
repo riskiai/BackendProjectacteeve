@@ -83,12 +83,34 @@ class ProjectController extends Controller
         return new ProjectCollection($projects);
     }
 
-    public function projectall(Request $request) {
+    // public function projectall(Request $request) {
 
+    //     $query = Project::query();
+
+    //      // Filter berdasarkan status project
+    //      if ($request->has('status')) {
+    //         $query->where('status', $request->status);
+    //     }
+
+    //     if ($request->has('date')) {
+    //         $date = str_replace(['[', ']'], '', $request->date);
+    //         $date = explode(", ", $date);
+
+    //         $query->whereBetween('created_at', $date);
+    //     }
+
+    //     $projects = $query->orderBy('created_at', 'desc')->get();
+
+    //     return new ProjectCollection($projects);
+
+    // }
+
+    public function projectall(Request $request)
+    {
         $query = Project::query();
 
-         // Filter berdasarkan status project
-         if ($request->has('status')) {
+        // Filter berdasarkan status proyek
+        if ($request->has('status')) {
             $query->where('status', $request->status);
         }
 
@@ -99,11 +121,15 @@ class ProjectController extends Controller
             $query->whereBetween('created_at', $date);
         }
 
-        $projects = $query->orderBy('created_at', 'desc')->get();
+        // Tambahkan kondisi untuk menyortir data berdasarkan nama proyek
+        $query->orderBy('name', 'asc');
+
+        // Ambil daftar proyek yang sudah diurutkan
+        $projects = $query->get();
 
         return new ProjectCollection($projects);
-
     }
+
 
     public function counting(Request $request)
     {

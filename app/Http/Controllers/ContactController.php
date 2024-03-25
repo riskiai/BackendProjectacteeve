@@ -100,6 +100,11 @@ class ContactController extends Controller
             $query->whereBetween('created_at', $date);
         }
 
+        // Tambahkan kondisi untuk menyortir data berdasarkan nama perusahaan jika jenis kontak adalah vendor
+        if ($request->has('contact_type') && $request->contact_type == ContactType::VENDOR) {
+            $query->orderBy('name', 'asc');
+        }
+
 
         // keluaran dari index ini merupakan paginate
         $contacts = $query->get();
