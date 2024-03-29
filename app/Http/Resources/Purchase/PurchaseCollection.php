@@ -136,23 +136,23 @@ class PurchaseCollection extends ResourceCollection
         return $data;
     }
 
-    // protected function getPpn($purchase)
-    // {
-    //     return ($purchase->sub_total * $purchase->ppn) / 100;
-    // }
+    /* protected function getPpn($purchase)
+    {
+        return ($purchase->sub_total * $purchase->ppn) / 100;
+    }
 
-    // protected function getPph($purchase)
-    // {
-    //     // Hitung hasil PPH 
-    //     $pphResult = round((($purchase->sub_total) * $purchase->taxPph->percent) / 100);
+    protected function getPph($purchase)
+    {
+        // Hitung hasil PPH 
+        $pphResult = round((($purchase->sub_total) * $purchase->taxPph->percent) / 100);
 
-    //     // Ubah nilai pph_hasil menjadi nilai yang dibulatkan
-    //     return [
-    //         "pph_type" => $purchase->taxPph->name,
-    //         "pph_rate" => $purchase->taxPph->percent,
-    //         "pph_hasil" => $pphResult
-    //     ];
-    // }
+        // Ubah nilai pph_hasil menjadi nilai yang dibulatkan
+        return [
+            "pph_type" => $purchase->taxPph->name,
+            "pph_rate" => $purchase->taxPph->percent,
+            "pph_hasil" => $pphResult
+        ];
+    } */
 
         protected function getPpn($purchase)
     {
