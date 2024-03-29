@@ -659,23 +659,54 @@ class PurchaseController extends Controller
         return $data;
     }
 
+    // protected function getPpn($purchase)
+    // {
+    //     return ($purchase->sub_total * $purchase->ppn) / 100;
+    // }
+
+    // protected function getPph($purchase)
+    // {
+    //     // Hitung hasil PPH 
+    //     $pphResult = round((($purchase->sub_total) * $purchase->taxPph->percent) / 100);
+
+    //     // Ubah nilai pph_hasil menjadi nilai yang dibulatkan
+    //     return [
+    //         "pph_type" => $purchase->taxPph->name,
+    //         "pph_rate" => $purchase->taxPph->percent,
+    //         "pph_hasil" => $pphResult
+    //     ];
+    // }
+
     protected function getPpn($purchase)
     {
-        return ($purchase->sub_total * $purchase->ppn) / 100;
+        if (is_numeric($purchase->ppn)) {
+            return ($purchase->sub_total * $purchase->ppn) / 100;
+        } else {
+            return 0; // Atau nilai default lainnya jika ppn bukan numerik
+        }
     }
 
     protected function getPph($purchase)
     {
-        // Hitung hasil PPH 
-        $pphResult = round((($purchase->sub_total) * $purchase->taxPph->percent) / 100);
+        if (is_numeric($purchase->pph)) {
+            // Hitung hasil PPH 
+            $pphResult = round((($purchase->sub_total) * $purchase->taxPph->percent) / 100);
 
-        // Ubah nilai pph_hasil menjadi nilai yang dibulatkan
-        return [
-            "pph_type" => $purchase->taxPph->name,
-            "pph_rate" => $purchase->taxPph->percent,
-            "pph_hasil" => $pphResult
-        ];
+            // Ubah nilai pph_hasil menjadi nilai yang dibulatkan
+            return [
+                "pph_type" => $purchase->taxPph->name,
+                "pph_rate" => $purchase->taxPph->percent,
+                "pph_hasil" => $pphResult
+            ];
+        } else {
+            return [
+                "pph_type" => "", // Atau nilai default lainnya jika pph bukan numerik
+                "pph_rate" => 0,
+                "pph_hasil" => 0
+            ];
+        }
     }
+
 
     // =======
     protected function saveDocument($purchase, $file, $iteration)
