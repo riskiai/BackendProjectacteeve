@@ -54,7 +54,7 @@ class Purchase extends Model
         return $this->hasOne(Tax::class, 'id', 'pph');
     }
 
-   /*  public function getTotalAttribute()
+    public function getTotalAttribute()
     {
         $total = floatval($this->attributes['sub_total']); 
 
@@ -77,29 +77,29 @@ class Purchase extends Model
         }
 
         return round($total);
-    } */
+    }
 
 
 
     /* Menghitung Total Kesuluruhan */
-    public function getTotalAttribute()
-    {
-        $total = $this->attributes['sub_total'];
+    // public function getTotalAttribute()
+    // {
+    //     $total = $this->attributes['sub_total'];
 
-        if ($this->attributes['ppn']) {
-            $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
-            $total += $ppn;
-        }
+    //     if ($this->attributes['ppn']) {
+    //         $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
+    //         $total += $ppn;
+    //     }
 
        
-        if ($this->attributes['pph']) {
+    //     if ($this->attributes['pph']) {
 
-            $pph = ($this->attributes['sub_total'] * $this->taxPph->percent) / 100;
-            $total -= $pph;
-        }
+    //         $pph = ($this->attributes['sub_total'] * $this->taxPph->percent) / 100;
+    //         $total -= $pph;
+    //     }
         
-        return round($total);
-    }
+    //     return round($total);
+    // }
 
     // public function getTotalAttribute()
     // {
