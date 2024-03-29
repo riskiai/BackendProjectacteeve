@@ -137,6 +137,13 @@ class PurchaseController extends Controller
         DB::beginTransaction();
 
         try {
+             // Validasi untuk PPN
+            $ppn = $request->tax_ppn;
+            if (!preg_match('/^\d+(\.\d+)?%?$/', $ppn)) {
+                DB::rollBack();
+                return MessageActeeve::error("Format PPN tidak valid. Harap masukkan nilai PPN dalam format persen tanpa menggunakan koma.");
+            }
+
             // Mendapatkan proyek yang diinginkan
             $project = null;
 
