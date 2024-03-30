@@ -37,58 +37,57 @@ use App\Http\Resources\Purchase\PurchaseCollection;
 class PurchaseController extends Controller
 {
     public function counting(Request $request)
-{
-    $purchaseId = $request->purchase_id ?? 1;
-    $userId = auth()->id();
-    $role = auth()->user()->role_id;
-
-    $counts = app(Pipeline::class)
-        ->send(Purchase::query())
-        ->through([
-            ByPurchaseID::class,
-            ByTab::class,
-            ByDate::class,
-            ByStatus::class,
-            ByVendor::class,
-            ByProject::class,
-            ByTax::class,
-            BySearch::class
-        ])
-        ->thenReturn()->selectRaw("
-            COUNT(*) as recieved,
-            SUM(CASE 
-                WHEN (tab = " . Purchase::TAB_VERIFIED . " AND due_date < NOW()) OR 
-                     (tab = " . Purchase::TAB_PAYMENT_REQUEST . " AND purchase_status_id = " . PurchaseStatus::OVERDUE . ") THEN sub_total ELSE 0 END) as over_due,
-            SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN sub_total ELSE 0 END) as submit,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN sub_total ELSE 0 END) as verified,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN sub_total ELSE 0 END) as open,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN sub_total ELSE 0 END) as due_date,
-            SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN sub_total ELSE 0 END) as payment_request,
-            SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN sub_total ELSE 0 END) as paid
-        ")
-        ->when($role == Role::USER, function ($query) use ($userId) {
-            return $query->where('user_id', $userId);
-        })
-        ->first();
-
-    return [
-        'status' => MessageActeeve::SUCCESS,
-        'status_code' => MessageActeeve::HTTP_OK,
-        "data" => [
-            "recieved" => $counts->recieved ?? 0,
-            "submit" => $counts->submit ?? 0,
-            "verified" => $counts->verified ?? 0,
-            "over_due" => $counts->over_due ?? 0,
-            "open" => $counts->open ?? 0,
-            "due_date" => $counts->due_date ?? 0,
-            "payment_request" => $counts->payment_request ?? 0,
-            "paid" => $counts->paid ?? 0,
-        ]
-    ];
-}
-
-
-
+    {
+        $purchaseId = $request->purchase_id ?? 1;
+        $userId = auth()->id();
+        $role = auth()->user()->role_id;
+    
+        $counts = app(Pipeline::class)
+            ->send(Purchase::query())
+            ->through([
+                ByPurchaseID::class,
+                ByTab::class,
+                ByDate::class,
+                ByStatus::class,
+                ByVendor::class,
+                ByProject::class,
+                ByTax::class,
+                BySearch::class
+            ])
+            ->thenReturn()->selectRaw("
+                COUNT(*) as recieved,
+                SUM(CASE 
+                    WHEN (tab = " . Purchase::TAB_VERIFIED . " AND due_date < NOW()) THEN sub_total ELSE 0 END) +
+                SUM(CASE 
+                    WHEN (tab = " . Purchase::TAB_PAYMENT_REQUEST . " AND purchase_status_id = " . PurchaseStatus::OVERDUE . ") THEN sub_total ELSE 0 END) as over_due,
+                SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN sub_total ELSE 0 END) as submit,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN sub_total ELSE 0 END) as verified,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN sub_total ELSE 0 END) as open,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN sub_total ELSE 0 END) as due_date,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN sub_total ELSE 0 END) as payment_request,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN sub_total ELSE 0 END) as paid
+            ")
+            ->when($role == Role::USER, function ($query) use ($userId) {
+                return $query->where('user_id', $userId);
+            })
+            ->first();
+    
+        return [
+            'status' => MessageActeeve::SUCCESS,
+            'status_code' => MessageActeeve::HTTP_OK,
+            "data" => [
+                "recieved" => $counts->recieved ?? 0,
+                "submit" => $counts->submit ?? 0,
+                "verified" => $counts->verified ?? 0,
+                "over_due" => $counts->over_due ?? 0,
+                "open" => $counts->open ?? 0,
+                "due_date" => $counts->due_date ?? 0,
+                "payment_request" => $counts->payment_request ?? 0,
+                "paid" => $counts->paid ?? 0,
+            ]
+        ];
+    }
+    
 
     public function index(Request $request)
     {
