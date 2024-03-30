@@ -43,23 +43,22 @@ class PurchaseController extends Controller
         $role = auth()->user()->role_id;
     
         $counts = app(Pipeline::class)
-            ->send(Purchase::query())
-            ->through([
-                ByPurchaseID::class,
-                ByTab::class,
-                ByDate::class,
-                ByStatus::class,
-                ByVendor::class,
-                ByProject::class,
-                ByTax::class,
-                BySearch::class
-            ])
-            ->thenReturn()->selectRaw("
+        ->send(Purchase::query())
+        ->through([
+            ByPurchaseID::class,
+            ByTab::class,
+            ByDate::class,
+            ByStatus::class,
+            ByVendor::class,
+            ByProject::class,
+            ByTax::class,
+            BySearch::class
+        ])
+        ->thenReturn()->selectRaw("
             COUNT(*) as recieved,
             SUM(
                 CASE 
-                    WHEN (tab = " . Purchase::TAB_VERIFIED . " AND due_date < NOW()) OR 
-                         (tab = " . Purchase::TAB_PAYMENT_REQUEST . " AND purchase_status_id = " . PurchaseStatus::OVERDUE . ") THEN sub_total 
+                    WHEN (tab = " . Purchase::TAB_VERIFIED . " OR tab = " . Purchase::TAB_PAYMENT_REQUEST . ") AND due_date < NOW() THEN sub_total 
                     ELSE 0 
                 END
             ) as over_due,
@@ -69,11 +68,11 @@ class PurchaseController extends Controller
             SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN sub_total ELSE 0 END) as due_date,
             SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN sub_total ELSE 0 END) as payment_request,
             SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN sub_total ELSE 0 END) as paid
-        ")        
-            ->when($role == Role::USER, function ($query) use ($userId) {
-                return $query->where('user_id', $userId);
-            })
-            ->first();
+        ")
+        ->when($role == Role::USER, function ($query) use ($userId) {
+            return $query->where('user_id', $userId);
+        })
+        ->first();
     
         return [
             'status' => MessageActeeve::SUCCESS,
