@@ -71,7 +71,7 @@ class PurchaseController extends Controller
     // Inisialisasi variabel lain
     $submit = 0;
     $verified = 0;
-    $over_due = 0;
+    $over_due = 0; // Menginisialisasi variabel over_due
     $open = 0;
     $due_date = 0;
     $payment_request = 0;
@@ -88,9 +88,17 @@ class PurchaseController extends Controller
                 } elseif ($purchase->due_date == today()) {
                     $due_date += $total;
                 }
+                // Menghitung over_due jika purchase berada di TAB_VERIFIED dan due_date < now()
+                if ($purchase->due_date < Carbon::now()) {
+                    $over_due += $total;
+                }
                 break;
             case Purchase::TAB_PAYMENT_REQUEST:
                 $payment_request += $total;
+                // Menghitung over_due jika purchase berada di TAB_PAYMENT_REQUEST dan due_date < now()
+                if ($purchase->due_date < Carbon::now()) {
+                    $over_due += $total;
+                }
                 break;
             case Purchase::TAB_PAID:
                 $paid += $total;
@@ -98,10 +106,6 @@ class PurchaseController extends Controller
             case Purchase::TAB_SUBMIT:
                 $submit += $total;
                 break;
-        }
-
-        if ($purchase->due_date < now()) {
-            $over_due += $total;
         }
     }
 
