@@ -37,84 +37,89 @@ use App\Http\Resources\Purchase\PurchaseCollection;
 class PurchaseController extends Controller
 {
     public function counting(Request $request)
-    {
-        $purchaseId = $request->purchase_id ?? 1;
-        $userId = auth()->id();
-        $role = auth()->user()->role_id;
+{
+    $purchaseId = $request->purchase_id ?? 1;
+    $userId = auth()->id();
+    $role = auth()->user()->role_id;
 
-        $counts = app(Pipeline::class)
-            ->send(Purchase::query())
-            ->through([
-                ByPurchaseID::class,
-                ByTab::class,
-                ByDate::class,
-                ByStatus::class,
-                ByVendor::class,
-                ByProject::class,
-                ByTax::class,
-                BySearch::class
-            ])
-            ->thenReturn()
-            ->when($role == Role::USER, function ($query) use ($userId) {
-                return $query->where('user_id', $userId);
-            })
-            ->get(); // Mengambil semua objek Purchase yang sesuai dengan kueri
+    // Mengambil jumlah total pembelian (received) berdasarkan purchase_id
+    $received = Purchase::where('purchase_id', $purchaseId)
+                    ->when($role == Role::USER, function ($query) use ($userId) {
+                        return $query->where('user_id', $userId);
+                    })
+                    ->count();
 
-        $recieved = 0;
-        $submit = 0;
-        $verified = 0;
-        $over_due = 0;
-        $open = 0;
-        $due_date = 0;
-        $payment_request = 0;
-        $paid = 0;
+    // Mengambil semua objek Purchase yang sesuai dengan kueri
+    $counts = app(Pipeline::class)
+        ->send(Purchase::query())
+        ->through([
+            ByPurchaseID::class,
+            ByTab::class,
+            ByDate::class,
+            ByStatus::class,
+            ByVendor::class,
+            ByProject::class,
+            ByTax::class,
+            BySearch::class
+        ])
+        ->thenReturn()
+        ->when($role == Role::USER, function ($query) use ($userId) {
+            return $query->where('user_id', $userId);
+        })
+        ->get(); // Mengambil semua objek Purchase yang sesuai dengan kueri
 
-        foreach ($counts as $purchase) {
-            $total = $purchase->getTotalAttribute(); // Mengambil nilai total dari setiap objek Purchase
+    // Inisialisasi variabel lain
+    $submit = 0;
+    $verified = 0;
+    $over_due = 0;
+    $open = 0;
+    $due_date = 0;
+    $payment_request = 0;
+    $paid = 0;
 
-            switch ($purchase->tab) {
-                case Purchase::TAB_VERIFIED:
-                    $verified += $total;
-                    if ($purchase->due_date > now()) {
-                        $open += $total;
-                    } elseif ($purchase->due_date == today()) {
-                        $due_date += $total;
-                    }
-                    break;
-                case Purchase::TAB_PAYMENT_REQUEST:
-                    $payment_request += $total;
-                    break;
-                case Purchase::TAB_PAID:
-                    $paid += $total;
-                    break;
-                case Purchase::TAB_SUBMIT:
-                    $submit += $total;
-                    break;
-            }
+    foreach ($counts as $purchase) {
+        $total = $purchase->getTotalAttribute(); // Mengambil nilai total dari setiap objek Purchase
 
-            if ($purchase->due_date < now()) {
-                $over_due += $total;
-            }
+        switch ($purchase->tab) {
+            case Purchase::TAB_VERIFIED:
+                $verified += $total;
+                if ($purchase->due_date > now()) {
+                    $open += $total;
+                } elseif ($purchase->due_date == today()) {
+                    $due_date += $total;
+                }
+                break;
+            case Purchase::TAB_PAYMENT_REQUEST:
+                $payment_request += $total;
+                break;
+            case Purchase::TAB_PAID:
+                $paid += $total;
+                break;
+            case Purchase::TAB_SUBMIT:
+                $submit += $total;
+                break;
         }
 
-        $recieved = $verified + $over_due;
-
-        return [
-            'status' => MessageActeeve::SUCCESS,
-            'status_code' => MessageActeeve::HTTP_OK,
-            "data" => [
-                "recieved" => $recieved,
-                "submit" => $submit,
-                "verified" => $verified,
-                "over_due" => $over_due,
-                "open" => $open,
-                "due_date" => $due_date,
-                "payment_request" => $payment_request,
-                "paid" => $paid,
-            ]
-        ];
+        if ($purchase->due_date < now()) {
+            $over_due += $total;
+        }
     }
 
+    return [
+        'status' => MessageActeeve::SUCCESS,
+        'status_code' => MessageActeeve::HTTP_OK,
+        "data" => [
+            "received" => $received, // Mengirimkan jumlah pembelian yang diterima (received) berdasarkan purchase_id
+            "submit" => $submit,
+            "verified" => $verified,
+            "over_due" => $over_due,
+            "open" => $open,
+            "due_date" => $due_date,
+            "payment_request" => $payment_request,
+            "paid" => $paid,
+        ]
+    ];
+}
 
 
 
