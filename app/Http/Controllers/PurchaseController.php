@@ -55,12 +55,16 @@ class PurchaseController extends Controller
                 BySearch::class
             ])
             ->thenReturn()
+            ->whereIn('tab', [Purchase::TAB_SUBMIT, Purchase::TAB_VERIFIED]) // Hanya ambil data dengan tab "submit" atau "verified"
             ->when($role == Role::USER, function ($query) use ($userId) {
                 return $query->where('user_id', $userId);
             })
             ->get(); // Mengambil semua objek Purchase yang sesuai dengan kueri
 
-        $recieved = 0;
+        // Menghitung jumlah pembelian yang diterima berdasarkan jumlah pembelian yang dibuat
+        $received = $counts->count();
+
+        // Menginisialisasi variabel lain
         $submit = 0;
         $verified = 0;
         $over_due = 0;
@@ -69,41 +73,32 @@ class PurchaseController extends Controller
         $payment_request = 0;
         $paid = 0;
 
+        // Melakukan perulangan untuk menghitung total lainnya
         foreach ($counts as $purchase) {
-            $total = $purchase->getTotalAttribute(); // Mengambil nilai total dari setiap objek Purchase
-
             switch ($purchase->tab) {
                 case Purchase::TAB_VERIFIED:
-                    $verified += $total;
+                    $verified++;
                     if ($purchase->due_date > now()) {
-                        $open += $total;
+                        $open++;
                     } elseif ($purchase->due_date == today()) {
-                        $due_date += $total;
+                        $due_date++;
                     }
                     break;
-                case Purchase::TAB_PAYMENT_REQUEST:
-                    $payment_request += $total;
-                    break;
-                case Purchase::TAB_PAID:
-                    $paid += $total;
-                    break;
                 case Purchase::TAB_SUBMIT:
-                    $submit += $total;
+                    $submit++;
                     break;
             }
 
             if ($purchase->due_date < now()) {
-                $over_due += $total;
+                $over_due++;
             }
         }
-
-        $recieved = $verified + $over_due;
 
         return [
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
             "data" => [
-                "recieved" => $recieved,
+                "received" => $received,
                 "submit" => $submit,
                 "verified" => $verified,
                 "over_due" => $over_due,
@@ -114,7 +109,6 @@ class PurchaseController extends Controller
             ]
         ];
     }
-
 
 
 
