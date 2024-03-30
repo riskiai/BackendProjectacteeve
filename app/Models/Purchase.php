@@ -79,8 +79,6 @@ class Purchase extends Model
         return round($total);
     }
 
-
-
     /* Menghitung Total Kesuluruhan */
     // public function getTotalAttribute()
     // {

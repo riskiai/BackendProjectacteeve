@@ -55,15 +55,16 @@ class PurchaseController extends Controller
                 BySearch::class
             ])
             ->thenReturn()->selectRaw("
-            COUNT(*) as recieved,
-            SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN sub_total ELSE 0 END) as submit,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN sub_total ELSE 0 END) as verified,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date < NOW() THEN sub_total ELSE 0 END) as over_due,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN sub_total ELSE 0 END) as open,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN sub_total ELSE 0 END) as due_date,
-            SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN sub_total ELSE 0 END) as payment_request,
-            SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN sub_total ELSE 0 END) as paid
-        ")
+                COUNT(*) as recieved,
+                SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN sub_total ELSE 0 END) as submit,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN sub_total ELSE 0 END) as verified,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date < NOW() THEN sub_total ELSE 0 END) as over_due_verified,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN sub_total ELSE 0 END) as open_verified,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN sub_total ELSE 0 END) as due_date_verified,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " AND purchase_status_id = " . PurchaseStatus::OVERDUE . " THEN sub_total ELSE 0 END) as overdue_payment_request,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " AND purchase_status_id != " . PurchaseStatus::OVERDUE . " THEN sub_total ELSE 0 END) as payment_request,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN sub_total ELSE 0 END) as paid
+            ")
             ->when($role == Role::USER, function ($query) use ($userId) {
                 return $query->where('user_id', $userId);
             })
