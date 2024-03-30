@@ -41,40 +41,40 @@ class PurchaseController extends Controller
         $purchaseId = $request->purchase_id ?? 1;
         $userId = auth()->id();
         $role = auth()->user()->role_id;
-    
-        $counts = app(Pipeline::class)
-        ->send(Purchase::query())
-        ->through([
-            ByPurchaseID::class,
-            ByTab::class,
-            ByDate::class,
-            ByStatus::class,
-            ByVendor::class,
-            ByProject::class,
-            ByTax::class,
-            BySearch::class
-        ])
-        ->thenReturn()->selectRaw("
-            COUNT(*) as recieved,
-            SUM(
-                CASE 
-                    WHEN (tab = " . Purchase::TAB_VERIFIED . " OR tab = " . Purchase::TAB_PAYMENT_REQUEST . ") AND due_date < NOW() THEN total 
-                    ELSE 0 
-                END
-            ) as over_due,
-            SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN total ELSE 0 END) as submit,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN total ELSE 0 END) as verified,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN total ELSE 0 END) as open,
-            SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN total ELSE 0 END) as due_date,
-            SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN total ELSE 0 END) as payment_request,
-            SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN total ELSE 0 END) as paid
-        ")
-        ->when($role == Role::USER, function ($query) use ($userId) {
-            return $query->where('user_id', $userId);
-        })
-        ->first();
 
-    
+        $counts = app(Pipeline::class)
+            ->send(Purchase::query())
+            ->through([
+                ByPurchaseID::class,
+                ByTab::class,
+                ByDate::class,
+                ByStatus::class,
+                ByVendor::class,
+                ByProject::class,
+                ByTax::class,
+                BySearch::class
+            ])
+            ->thenReturn()
+            ->selectRaw("
+                COUNT(*) as recieved,
+                SUM(
+                    CASE 
+                        WHEN (tab = " . Purchase::TAB_VERIFIED . " OR tab = " . Purchase::TAB_PAYMENT_REQUEST . ") AND due_date < NOW() THEN " . Purchase::class . "::getTotalAttribute() 
+                        ELSE 0 
+                    END
+                ) as over_due,
+                SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN " . Purchase::class . "::getTotalAttribute() ELSE 0 END) as submit,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN " . Purchase::class . "::getTotalAttribute() ELSE 0 END) as verified,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN " . Purchase::class . "::getTotalAttribute() ELSE 0 END) as open,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN " . Purchase::class . "::getTotalAttribute() ELSE 0 END) as due_date,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN " . Purchase::class . "::getTotalAttribute() ELSE 0 END) as payment_request,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN " . Purchase::class . "::getTotalAttribute() ELSE 0 END) as paid
+            ")
+            ->when($role == Role::USER, function ($query) use ($userId) {
+                return $query->where('user_id', $userId);
+            })
+            ->first();
+
         return [
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
