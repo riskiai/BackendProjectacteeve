@@ -62,7 +62,7 @@ class PurchaseController extends Controller
             SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN sub_total ELSE 0 END) as open,
             SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN sub_total ELSE 0 END) as due_date,
             SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN sub_total ELSE 0 END) as payment_request,
-            SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . "AND due_date < NOW() THEN sub_total ELSE 0 END) as over_due,
+            SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " AND due_date < NOW() THEN sub_total ELSE 0 END) as over_due,
             SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN sub_total ELSE 0 END) as paid
         ")
             ->when($role == Role::USER, function ($query) use ($userId) {
@@ -85,6 +85,7 @@ class PurchaseController extends Controller
             ]
         ];
     }
+
 
 
     public function index(Request $request)
