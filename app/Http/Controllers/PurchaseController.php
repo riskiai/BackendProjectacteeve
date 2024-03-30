@@ -41,10 +41,7 @@ class PurchaseController extends Controller
         $purchaseId = $request->purchase_id ?? 1;
         $userId = auth()->id();
         $role = auth()->user()->role_id;
-    
-        // Buat instance model Purchase
-        $purchase = new Purchase();
-    
+
         $counts = app(Pipeline::class)
             ->send(Purchase::query())
             ->through([
@@ -62,22 +59,22 @@ class PurchaseController extends Controller
                 COUNT(*) as recieved,
                 SUM(
                     CASE 
-                        WHEN (tab = " . Purchase::TAB_VERIFIED . " OR tab = " . Purchase::TAB_PAYMENT_REQUEST . ") AND due_date < NOW() THEN " . $purchase->total . "
+                        WHEN (tab = " . Purchase::TAB_VERIFIED . " OR tab = " . Purchase::TAB_PAYMENT_REQUEST . ") AND due_date < NOW() THEN total 
                         ELSE 0 
                     END
                 ) as over_due,
-                SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN " . $purchase->total . " ELSE 0 END) as submit,
-                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN " . $purchase->total . " ELSE 0 END) as verified,
-                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN " . $purchase->total . " ELSE 0 END) as open,
-                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN " . $purchase->total . " ELSE 0 END) as due_date,
-                SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN " . $purchase->total . " ELSE 0 END) as payment_request,
-                SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN " . $purchase->total . " ELSE 0 END) as paid
+                SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN total ELSE 0 END) as submit,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN total ELSE 0 END) as verified,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN total ELSE 0 END) as open,
+                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN total ELSE 0 END) as due_date,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN total ELSE 0 END) as payment_request,
+                SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN total ELSE 0 END) as paid
             ")
             ->when($role == Role::USER, function ($query) use ($userId) {
                 return $query->where('user_id', $userId);
             })
             ->first();
-    
+
         return [
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
@@ -93,9 +90,8 @@ class PurchaseController extends Controller
             ]
         ];
     }
-    
 
-    
+
 
     public function index(Request $request)
     {
