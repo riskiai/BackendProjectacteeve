@@ -78,7 +78,7 @@ class PurchaseController extends Controller
                 "recieved" => $counts->recieved ?? 0,
                 "submit" => $counts->submit ?? 0,
                 "verified" => $counts->verified ?? 0,
-                "over_due" => $counts->over_due ?? 0,
+                "over_due" => $counts->overdue ?? 0,
                 "open" => $counts->open ?? 0,
                 "due_date" => $counts->due_date ?? 0,
                 "payment_request" => $counts->payment_request ?? 0,
