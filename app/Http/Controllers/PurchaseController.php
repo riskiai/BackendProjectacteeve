@@ -43,7 +43,7 @@ class PurchaseController extends Controller
     $role = auth()->user()->role_id;
 
     // Mengambil jumlah total pembelian (received) berdasarkan purchase_id
-    $received = Purchase::where('purchase_id', $purchaseId)
+    $recieved = Purchase::where('purchase_id', $purchaseId)
                     ->when($role == Role::USER, function ($query) use ($userId) {
                         return $query->where('user_id', $userId);
                     })
@@ -109,7 +109,7 @@ class PurchaseController extends Controller
         'status' => MessageActeeve::SUCCESS,
         'status_code' => MessageActeeve::HTTP_OK,
         "data" => [
-            "received" => $received, // Mengirimkan jumlah pembelian yang diterima (received) berdasarkan purchase_id
+            "recieved" => $recieved, // Mengirimkan jumlah pembelian yang diterima (received) berdasarkan purchase_id
             "submit" => $submit,
             "verified" => $verified,
             "over_due" => $over_due,
