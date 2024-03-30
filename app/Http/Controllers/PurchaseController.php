@@ -55,41 +55,66 @@ class PurchaseController extends Controller
                 BySearch::class
             ])
             ->thenReturn()
-            ->selectRaw("
-                COUNT(*) as recieved,
-                SUM(
-                    CASE 
-                        WHEN (tab = " . Purchase::TAB_VERIFIED . " OR tab = " . Purchase::TAB_PAYMENT_REQUEST . ") AND due_date < NOW() THEN total 
-                        ELSE 0 
-                    END
-                ) as over_due,
-                SUM(CASE WHEN tab = " . Purchase::TAB_SUBMIT . " THEN total ELSE 0 END) as submit,
-                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " THEN total ELSE 0 END) as verified,
-                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date > NOW() THEN total ELSE 0 END) as open,
-                SUM(CASE WHEN tab = " . Purchase::TAB_VERIFIED . " AND due_date = CURDATE() THEN total ELSE 0 END) as due_date,
-                SUM(CASE WHEN tab = " . Purchase::TAB_PAYMENT_REQUEST . " THEN total ELSE 0 END) as payment_request,
-                SUM(CASE WHEN tab = " . Purchase::TAB_PAID . " THEN total ELSE 0 END) as paid
-            ")
             ->when($role == Role::USER, function ($query) use ($userId) {
                 return $query->where('user_id', $userId);
             })
-            ->first();
+            ->get(); // Mengambil semua objek Purchase yang sesuai dengan kueri
+
+        $recieved = 0;
+        $submit = 0;
+        $verified = 0;
+        $over_due = 0;
+        $open = 0;
+        $due_date = 0;
+        $payment_request = 0;
+        $paid = 0;
+
+        foreach ($counts as $purchase) {
+            $total = $purchase->getTotalAttribute(); // Mengambil nilai total dari setiap objek Purchase
+
+            switch ($purchase->tab) {
+                case Purchase::TAB_VERIFIED:
+                    $verified += $total;
+                    if ($purchase->due_date > now()) {
+                        $open += $total;
+                    } elseif ($purchase->due_date == today()) {
+                        $due_date += $total;
+                    }
+                    break;
+                case Purchase::TAB_PAYMENT_REQUEST:
+                    $payment_request += $total;
+                    break;
+                case Purchase::TAB_PAID:
+                    $paid += $total;
+                    break;
+                case Purchase::TAB_SUBMIT:
+                    $submit += $total;
+                    break;
+            }
+
+            if ($purchase->due_date < now()) {
+                $over_due += $total;
+            }
+        }
+
+        $recieved = $verified + $over_due;
 
         return [
             'status' => MessageActeeve::SUCCESS,
             'status_code' => MessageActeeve::HTTP_OK,
             "data" => [
-                "recieved" => $counts->recieved ?? 0,
-                "submit" => $counts->submit ?? 0,
-                "verified" => $counts->verified ?? 0,
-                "over_due" => $counts->over_due ?? 0,
-                "open" => $counts->open ?? 0,
-                "due_date" => $counts->due_date ?? 0,
-                "payment_request" => $counts->payment_request ?? 0,
-                "paid" => $counts->paid ?? 0,
+                "recieved" => $recieved,
+                "submit" => $submit,
+                "verified" => $verified,
+                "over_due" => $over_due,
+                "open" => $open,
+                "due_date" => $due_date,
+                "payment_request" => $payment_request,
+                "paid" => $paid,
             ]
         ];
     }
+
 
 
 
