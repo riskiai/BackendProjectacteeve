@@ -54,50 +54,50 @@ class Purchase extends Model
         return $this->hasOne(Tax::class, 'id', 'pph');
     }
 
-    public function getTotalAttribute()
-    {
-        $total = floatval($this->attributes['sub_total']); 
-
-        // Ubah nilai ppn yang menggunakan koma menjadi titik
-        $ppn = str_replace(',', '.', $this->attributes['ppn']);
-
-        if (is_numeric($ppn)) {
-            $ppn = floatval($ppn);
-            $ppnAmount = ($total * $ppn) / 100; 
-            $total += $ppnAmount;
-        }
-
-        // Ubah nilai pph yang menggunakan koma menjadi titik
-        $pph = str_replace(',', '.', $this->attributes['pph']);
-
-        if (is_numeric($pph)) {
-            $pph = floatval($pph);
-            $pphAmount = ($total * $pph) / 100; 
-            $total -= $pphAmount;
-        }
-
-        return round($total);
-    }
-
-    /* Menghitung Total Kesuluruhan */
     // public function getTotalAttribute()
     // {
-    //     $total = $this->attributes['sub_total'];
+    //     $total = floatval($this->attributes['sub_total']); 
 
-    //     if ($this->attributes['ppn']) {
-    //         $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
-    //         $total += $ppn;
+    //     // Ubah nilai ppn yang menggunakan koma menjadi titik
+    //     $ppn = str_replace(',', '.', $this->attributes['ppn']);
+
+    //     if (is_numeric($ppn)) {
+    //         $ppn = floatval($ppn);
+    //         $ppnAmount = ($total * $ppn) / 100; 
+    //         $total += $ppnAmount;
     //     }
 
-       
-    //     if ($this->attributes['pph']) {
+    //     // Ubah nilai pph yang menggunakan koma menjadi titik
+    //     $pph = str_replace(',', '.', $this->attributes['pph']);
 
-    //         $pph = ($this->attributes['sub_total'] * $this->taxPph->percent) / 100;
-    //         $total -= $pph;
+    //     if (is_numeric($pph)) {
+    //         $pph = floatval($pph);
+    //         $pphAmount = ($total * $pph) / 100; 
+    //         $total -= $pphAmount;
     //     }
-        
+
     //     return round($total);
     // }
+
+    /* Menghitung Total Kesuluruhan */
+    public function getTotalAttribute()
+    {
+        $total = $this->attributes['sub_total'];
+
+        if ($this->attributes['ppn']) {
+            $ppn = ($this->attributes['sub_total'] * $this->attributes['ppn']) / 100;
+            $total += $ppn;
+        }
+
+       
+        if ($this->attributes['pph']) {
+
+            $pph = ($this->attributes['sub_total'] * $this->taxPph->percent) / 100;
+            $total -= $pph;
+        }
+        
+        return round($total);
+    }
 
     // public function getTotalAttribute()
     // {
