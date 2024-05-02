@@ -86,6 +86,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // end point tax resource
     Route::get('tax/ppn/report', [TaxController::class, 'reportPpn']);
+    Route::get('tax/ppn/reportall', [TaxController::class, 'reportPpnall']);
     Route::apiResource('tax', TaxController::class);
 
     // end point puchase resource

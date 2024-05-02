@@ -169,6 +169,35 @@ class TaxController extends Controller
         return new PurchaseCollection($purchases);
     }
 
+    public function reportPpnall(Request $request)
+    {
+        $query = Purchase::query();
+    
+        $purchases = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                ByDate::class,
+                InTaxReport::class,
+                ByPurchaseID::class,
+                ByTab::class,
+                ByStatus::class,
+                ByVendor::class,
+                ByProject::class,
+                ByTax::class,
+                BySearch::class
+            ])
+            ->thenReturn()
+            ->where(function ($query) {
+                $query->whereNotNull('ppn')
+                    ->where('ppn', '>', 0); 
+            })
+            ->orderBy('date', 'desc')
+            ->get(); // Menggunakan metode get() untuk mengambil semua data
+    
+        return new PurchaseCollection($purchases);
+    }
+    
+
     protected function getPpn($purchase)
     {
         return ($purchase->sub_total * $purchase->ppn) / 100;
