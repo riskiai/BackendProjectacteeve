@@ -38,7 +38,7 @@ class CreateRequest extends FormRequest
 
         if ($this->hasFile('attachment_file')) {
             $request['attachment_file'] = 'array';
-            $request['attachment_file.*'] = 'nullable|mimes:pdf,png,jpg,jpeg,xlsx,xls|max:3072';
+            $request['attachment_file.*'] = 'nullable|mimes:pdf,png,jpg,jpeg,xlsx,xls,heic|max:3072';
         }
 
         if (request()->purchase_id == 1) {
