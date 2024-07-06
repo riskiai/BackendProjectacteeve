@@ -167,7 +167,8 @@ class PurchaseController extends Controller
             $purchases->orderBy('date', 'desc');
         }
     
-        $purchases = $purchases->paginate($request->per_page);
+           // Cursor-based pagination
+           $purchases = $purchases->cursorPaginate($request->get('per_page', 10));
     
         return new PurchaseCollection($purchases);
     }
