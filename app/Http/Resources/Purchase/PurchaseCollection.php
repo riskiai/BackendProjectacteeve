@@ -10,6 +10,11 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class PurchaseCollection extends ResourceCollection
 {
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @return array<int|string, mixed>
+     */
     public function toArray(Request $request): array
     {
         $data = [];
@@ -37,7 +42,8 @@ class PurchaseCollection extends ResourceCollection
                 "ppn" => $this->getPpn($purchase),
                 "logs_rejected" => $purchase->logs()->select('name', 'note_reject', 'created_at')->where('note_reject', '!=', null)->orderBy('id', 'desc')->get(),
                 "created_at" => $purchase->created_at->format('Y-m-d'),
-                "updated_at" => $purchase->updated_at->format('Y-m-d'),
+                "updated_at" => $purchase->updated_at->format('Y-m-d'),                
+                
             ];
 
             if ($purchase->user) {
@@ -60,21 +66,7 @@ class PurchaseCollection extends ResourceCollection
             }
         }
 
-        return [
-            'data' => $data,
-            'pagination' => [
-                'links' => [
-                    'next' => $this->nextPageUrl(),
-                    'previous' => $this->previousPageUrl(),
-                ],
-                'meta' => [
-                    'current_page' => $this->currentPage(),
-                    'last_page' => $this->lastPage(),
-                    'per_page' => $this->perPage(),
-                    'total' => $this->total(),
-                ],
-            ],
-        ];
+        return $data;
     }
 
     protected function getDocument($documents)
@@ -144,7 +136,25 @@ class PurchaseCollection extends ResourceCollection
         return $data;
     }
 
-    protected function getPpn($purchase)
+    /* protected function getPpn($purchase)
+    {
+        return ($purchase->sub_total * $purchase->ppn) / 100;
+    }
+
+    protected function getPph($purchase)
+    {
+        // Hitung hasil PPH 
+        $pphResult = round((($purchase->sub_total) * $purchase->taxPph->percent) / 100);
+
+        // Ubah nilai pph_hasil menjadi nilai yang dibulatkan
+        return [
+            "pph_type" => $purchase->taxPph->name,
+            "pph_rate" => $purchase->taxPph->percent,
+            "pph_hasil" => $pphResult
+        ];
+    } */
+
+        protected function getPpn($purchase)
     {
         if (is_numeric($purchase->ppn)) {
             return ($purchase->sub_total * $purchase->ppn) / 100;
@@ -173,4 +183,5 @@ class PurchaseCollection extends ResourceCollection
             ];
         }
     }
+
 }
