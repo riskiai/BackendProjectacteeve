@@ -66,21 +66,7 @@ class PurchaseCollection extends ResourceCollection
             }
         }
 
-        return [
-            'data' => $data,
-            'pagination' => [
-                'links' => [
-                    'next' => $this->nextPageUrl(),
-                    'previous' => $this->previousPageUrl(),
-                ],
-                'meta' => [
-                    'current_page' => $this->currentPage(),
-                    'last_page' => $this->lastPage(),
-                    'per_page' => $this->perPage(),
-                    'total' => $this->total(),
-                ],
-            ],
-        ];
+        return $data;
     }
 
     protected function getDocument($documents)
