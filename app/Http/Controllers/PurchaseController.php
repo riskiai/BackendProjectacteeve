@@ -128,6 +128,7 @@ class PurchaseController extends Controller
 
     public function index(Request $request)
     {
+        // Initial query with necessary filters
         $query = Purchase::query();
     
         // Apply user role filter
@@ -142,7 +143,7 @@ class PurchaseController extends Controller
         }
     
         // Apply filters using Pipeline
-        $purchasesQuery = app(Pipeline::class)
+        $filteredQuery = app(Pipeline::class)
             ->send($query)
             ->through([
                 ByDate::class,
@@ -160,25 +161,44 @@ class PurchaseController extends Controller
         // Apply sorting based on the selected tab
         if ($request->has('tab')) {
             if ($request->tab == Purchase::TAB_SUBMIT) {
-                $purchasesQuery->orderBy('date', 'desc');
+                $filteredQuery->orderBy('date', 'desc');
             } elseif (in_array($request->tab, [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
-                $purchasesQuery->orderBy('due_date', 'asc');
+                $filteredQuery->orderBy('due_date', 'asc');
             } elseif ($request->tab == Purchase::TAB_PAID) {
-                $purchasesQuery->orderBy('updated_at', 'desc');
+                $filteredQuery->orderBy('updated_at', 'desc');
             }
         } else {
             // Default sorting if no tab is selected
-            $purchasesQuery->orderBy('date', 'desc');
+            $filteredQuery->orderBy('date', 'desc');
         }
     
-        // Group by doc_no to ensure unique doc_no per page
-        $purchasesQuery->groupBy('doc_no');
+        // Get distinct doc_no values
+        $distinctDocNos = $filteredQuery->select('doc_no')->distinct()->pluck('doc_no');
     
-        // Paginate the results
-        $purchases = $purchasesQuery->paginate($request->per_page);
+        // Paginate the distinct doc_no values
+        $page = $request->input('page', 1);
+        $perPage = $request->input('per_page', 15);
+        $paginatedDocNos = $distinctDocNos->forPage($page, $perPage);
     
-        return new PurchaseCollection($purchases);
+        // Retrieve full purchase records for the paginated doc_no values
+        $purchases = Purchase::whereIn('doc_no', $paginatedDocNos)
+            ->orderByRaw("FIELD(doc_no, " . implode(',', $paginatedDocNos->map(function ($doc_no) {
+                return "'$doc_no'";
+            })->toArray()) . ")")
+            ->get();
+    
+        // Create a paginator instance manually
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $purchases,
+            $distinctDocNos->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+    
+        return new PurchaseCollection($paginator);
     }
+    
     
 
     public function purchaseall(Request $request)
