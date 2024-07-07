@@ -126,55 +126,78 @@ class PurchaseController extends Controller
     }
 
     public function index(Request $request)
-    {
-        $query = Purchase::query();
-    
-        // Apply user role filter
-        if (auth()->user()->role_id == Role::USER) {
-            $query->where('user_id', auth()->user()->id);
-        }
-    
-        // Exclude already displayed doc_no values
-        if ($request->has('excluded_doc_nos')) {
-            $excludedDocNos = explode(',', $request->excluded_doc_nos);
-            $query->whereNotIn('doc_no', $excludedDocNos);
-        }
-    
-        // Apply filters using Pipeline
-        $purchases = app(Pipeline::class)
-            ->send($query)
-            ->through([
-                ByDate::class,
-                ByUpdated::class,
-                ByPurchaseID::class,
-                ByTab::class,
-                ByStatus::class,
-                ByVendor::class,
-                ByProject::class,
-                ByTax::class,
-                BySearch::class,
-            ])
-            ->thenReturn();
-    
-        // Apply sorting based on the selected tab
-        if ($request->has('tab')) {
-            if ($request->tab == Purchase::TAB_SUBMIT) {
-                $purchases->orderBy('date', 'desc');
-            } elseif (in_array($request->tab, [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
-                $purchases->orderBy('due_date', 'asc');
-            } elseif ($request->tab == Purchase::TAB_PAID) {
-                $purchases->orderBy('updated_at', 'desc');
-            }
-        } else {
-            // Default sorting if no tab is selected
-            $purchases->orderBy('date', 'desc');
-        }
-    
-        // Ensure unique records and paginate
-        $purchases = $purchases->distinct('doc_no')->paginate($request->per_page);
-    
-        return new PurchaseCollection($purchases);
+{
+    $query = Purchase::query();
+
+    // Apply user role filter
+    if (auth()->user()->role_id == Role::USER) {
+        $query->where('user_id', auth()->user()->id);
     }
+
+    // Exclude already displayed doc_no values
+    if ($request->has('excluded_doc_nos')) {
+        $excludedDocNos = explode(',', $request->excluded_doc_nos);
+        $query->whereNotIn('doc_no', $excludedDocNos);
+    }
+
+    // Apply filters using Pipeline
+    $purchasesQuery = app(Pipeline::class)
+        ->send($query)
+        ->through([
+            ByDate::class,
+            ByUpdated::class,
+            ByPurchaseID::class,
+            ByTab::class,
+            ByStatus::class,
+            ByVendor::class,
+            ByProject::class,
+            ByTax::class,
+            BySearch::class,
+        ])
+        ->thenReturn();
+
+    // Apply sorting based on the selected tab
+    if ($request->has('tab')) {
+        if ($request->tab == Purchase::TAB_SUBMIT) {
+            $purchasesQuery->orderBy('date', 'desc');
+        } elseif (in_array($request->tab, [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
+            $purchasesQuery->orderBy('due_date', 'asc');
+        } elseif ($request->tab == Purchase::TAB_PAID) {
+            $purchasesQuery->orderBy('updated_at', 'desc');
+        }
+    } else {
+        // Default sorting if no tab is selected
+        $purchasesQuery->orderBy('date', 'desc');
+    }
+
+    // Get distinct doc_no values
+    $distinctDocNosQuery = $purchasesQuery->select('doc_no')->distinct();
+
+    // Join with the original query
+    $distinctPurchasesQuery = Purchase::query()
+        ->joinSub($distinctDocNosQuery, 'distinct_purchases', function ($join) {
+            $join->on('purchases.doc_no', '=', 'distinct_purchases.doc_no');
+        });
+
+    // Apply the same sorting to the final query
+    if ($request->has('tab')) {
+        if ($request->tab == Purchase::TAB_SUBMIT) {
+            $distinctPurchasesQuery->orderBy('date', 'desc');
+        } elseif (in_array($request->tab, [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
+            $distinctPurchasesQuery->orderBy('due_date', 'asc');
+        } elseif ($request->tab == Purchase::TAB_PAID) {
+            $distinctPurchasesQuery->orderBy('updated_at', 'desc');
+        }
+    } else {
+        $distinctPurchasesQuery->orderBy('date', 'desc');
+    }
+
+    // Paginate the results
+    $purchases = $distinctPurchasesQuery->paginate($request->per_page);
+
+    return new PurchaseCollection($purchases);
+}
+
     
     
 
