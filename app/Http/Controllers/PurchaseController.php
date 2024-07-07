@@ -168,7 +168,7 @@ class PurchaseController extends Controller
         }
     
         // Gunakan group by pada doc_no untuk menghindari duplikasi
-        $purchases = $purchases->groupBy('doc_no')->distinct()->paginate($request->get('per_page', 15));
+        $purchases = $purchases->groupBy('doc_no')->distinct()->paginate($request->per_page);
         
         return new PurchaseCollection($purchases);
     }
