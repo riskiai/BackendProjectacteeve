@@ -3,7 +3,6 @@
 namespace App\Facades\Filters\Purchase;
 
 use Closure;
-use App\Models\Purchase;
 use Illuminate\Database\Eloquent\Builder;
 
 class ByTab
@@ -14,21 +13,7 @@ class ByTab
             return $next($query);
         }
 
-        // Filter records based on the selected tab
-        switch (request('tab')) {
-            case Purchase::TAB_SUBMIT:
-                $query->where('status', 'submit');
-                break;
-            case Purchase::TAB_VERIFIED:
-                $query->where('status', 'verified');
-                break;
-            case Purchase::TAB_PAYMENT_REQUEST:
-                $query->where('status', 'payment_request');
-                break;
-            case Purchase::TAB_PAID:
-                $query->where('status', 'paid');
-                break;
-        }
+        $query->where('tab', request('tab', 1));
 
         return $next($query);
     }
