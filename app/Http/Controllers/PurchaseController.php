@@ -176,6 +176,7 @@ class PurchaseController extends Controller
         return new PurchaseCollection($purchases);
     }
     
+    
 
     public function purchaseall(Request $request)
     {
