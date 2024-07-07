@@ -127,18 +127,24 @@ class PurchaseController extends Controller
 
 
     public function index(Request $request)
-    {
+{
+    try {
+        // Query awal dengan filter yang diperlukan
         $query = Purchase::query();
-    
-        // Tambahkan filter berdasarkan tanggal terkini
-        // $query->whereDate('date', Carbon::today());
 
         // Terapkan filter berdasarkan peran pengguna
         if (auth()->user()->role_id == Role::USER) {
             $query->where('user_id', auth()->user()->id);
         }
-        
-        $purchases = app(Pipeline::class)
+
+        // Kecualikan nilai doc_no yang sudah ditampilkan
+        if ($request->has('excluded_doc_nos')) {
+            $excludedDocNos = explode(',', $request->excluded_doc_nos);
+            $query->whereNotIn('doc_no', $excludedDocNos);
+        }
+
+        // Terapkan filter menggunakan Pipeline
+        $filteredQuery = app(Pipeline::class)
             ->send($query)
             ->through([
                 ByDate::class,
@@ -152,25 +158,56 @@ class PurchaseController extends Controller
                 BySearch::class,
             ])
             ->thenReturn();
-    
-        // kondisi untuk pengurutan berdasarkan tab
-        if (request()->has('tab')) {
-            if (request('tab') == Purchase::TAB_SUBMIT) {
-                $purchases->orderBy('date', 'desc');
-            } elseif (in_array(request('tab'), [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
-                $purchases->orderBy('due_date', 'asc');
-            } elseif (request('tab') == Purchase::TAB_PAID) {
-                $purchases->orderBy('updated_at', 'desc');
+
+        // Terapkan pengurutan berdasarkan tab yang dipilih
+        if ($request->has('tab')) {
+            if ($request->tab == Purchase::TAB_SUBMIT) {
+                $filteredQuery->orderBy('date', 'desc');
+            } elseif (in_array($request->tab, [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
+                $filteredQuery->orderBy('due_date', 'asc');
+            } elseif ($request->tab == Purchase::TAB_PAID) {
+                $filteredQuery->orderBy('updated_at', 'desc');
             }
         } else {
-            // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
-            $purchases->orderBy('date', 'desc');
+            // Pengurutan default jika tidak ada tab yang dipilih
+            $filteredQuery->orderBy('date', 'desc');
         }
-    
-        $purchases = $purchases->paginate($request->per_page);
-    
-        return new PurchaseCollection($purchases);
+
+        // Dapatkan nilai doc_no yang unik
+        $distinctDocNos = $filteredQuery->distinct()->pluck('doc_no');
+
+        // Tentukan jumlah item per halaman dan halaman saat ini dari pengaturan default Laravel
+        $perPage = $request->input('per_page', 15);
+        $page = $request->input('page', 1);
+
+        // Paginasikan nilai doc_no yang unik
+        $paginatedDocNos = $distinctDocNos->slice(($page - 1) * $perPage, $perPage);
+
+        // Ambil catatan pembelian lengkap berdasarkan nilai doc_no yang dipaginasi
+        $purchases = Purchase::whereIn('doc_no', $paginatedDocNos)
+            ->orderByRaw("FIELD(doc_no, " . $paginatedDocNos->map(function ($doc_no) {
+                return "'$doc_no'";
+            })->implode(',') . ")")
+            ->get();
+
+        // Buat instance paginator secara manual
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $purchases,
+            $distinctDocNos->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return new PurchaseCollection($paginator);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error fetching purchases: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
     }
+}
+
 
     public function purchaseall(Request $request)
     {
