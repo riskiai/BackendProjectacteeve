@@ -130,14 +130,18 @@ class PurchaseController extends Controller
     {
         $query = Purchase::query();
     
-        // Tambahkan filter berdasarkan tanggal terkini
-        // $query->whereDate('date', Carbon::today());
-
-        // Terapkan filter berdasarkan peran pengguna
+        // Apply user role filter
         if (auth()->user()->role_id == Role::USER) {
             $query->where('user_id', auth()->user()->id);
         }
-        
+    
+        // Exclude already displayed IDs
+        if ($request->has('excluded_ids')) {
+            $excludedIds = explode(',', $request->excluded_ids);
+            $query->whereNotIn('id', $excludedIds);
+        }
+    
+        // Apply filters using Pipeline
         $purchases = app(Pipeline::class)
             ->send($query)
             ->through([
@@ -153,24 +157,26 @@ class PurchaseController extends Controller
             ])
             ->thenReturn();
     
-        // kondisi untuk pengurutan berdasarkan tab
-        if (request()->has('tab')) {
-            if (request('tab') == Purchase::TAB_SUBMIT) {
+        // Apply sorting based on the selected tab
+        if ($request->has('tab')) {
+            if ($request->tab == Purchase::TAB_SUBMIT) {
                 $purchases->orderBy('date', 'desc');
-            } elseif (in_array(request('tab'), [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
+            } elseif (in_array($request->tab, [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
                 $purchases->orderBy('due_date', 'asc');
-            } elseif (request('tab') == Purchase::TAB_PAID) {
+            } elseif ($request->tab == Purchase::TAB_PAID) {
                 $purchases->orderBy('updated_at', 'desc');
             }
         } else {
-            // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
+            // Default sorting if no tab is selected
             $purchases->orderBy('date', 'desc');
         }
     
-        $purchases = $purchases->paginate($request->per_page);
+        // Ensure unique records and paginate
+        $purchases = $purchases->distinct()->paginate($request->per_page);
     
         return new PurchaseCollection($purchases);
     }
+    
 
     public function purchaseall(Request $request)
     {
