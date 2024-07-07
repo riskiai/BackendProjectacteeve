@@ -128,15 +128,15 @@ class PurchaseController extends Controller
 
     public function index(Request $request)
 {
-    $query = Purchase::query();
-    
     // Filter berdasarkan peran pengguna
+    $query = Purchase::query();
+
     if (auth()->user()->role_id == Role::USER) {
         $query->where('user_id', auth()->user()->id);
     }
 
-    // Pipeline untuk filter tambahan
-    $purchases = app(Pipeline::class)
+    // Tambahkan pipeline filter
+    $query = app(Pipeline::class)
         ->send($query)
         ->through([
             ByDate::class,
@@ -154,31 +154,27 @@ class PurchaseController extends Controller
     // Kondisi untuk pengurutan berdasarkan tab
     if (request()->has('tab')) {
         if (request('tab') == Purchase::TAB_SUBMIT) {
-            $purchases->orderBy('date', 'desc');
+            $query->orderBy('date', 'desc');
         } elseif (in_array(request('tab'), [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
-            $purchases->orderBy('due_date', 'asc');
+            $query->orderBy('due_date', 'asc');
         } elseif (request('tab') == Purchase::TAB_PAID) {
-            $purchases->orderBy('updated_at', 'desc');
+            $query->orderBy('updated_at', 'desc');
         }
     } else {
         // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
-        $purchases->orderBy('date', 'desc');
+        $query->orderBy('date', 'desc');
     }
 
-    // Subquery untuk memastikan data unik
-    $subQuery = $purchases->groupBy('doc_no')
-                          ->selectRaw('max(id) as id')
-                          ->pluck('id');
+    // Subquery untuk memilih ID unik
+    $subQuery = $query->select('id')->groupBy('doc_no');
 
+    // Query utama untuk mengambil data unik berdasarkan subquery
     $purchases = Purchase::whereIn('id', $subQuery)
-                         ->paginate($request->get('per_page', 15));
+        ->paginate($request->get('per_page', 15));
 
     return new PurchaseCollection($purchases);
 }
 
-    
-
-    
 
     public function purchaseall(Request $request)
     {
