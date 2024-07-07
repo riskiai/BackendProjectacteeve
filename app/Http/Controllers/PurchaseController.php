@@ -127,22 +127,21 @@ class PurchaseController extends Controller
 
 
     public function index(Request $request)
-{
-    try {
+    {
         // Query awal dengan filter yang diperlukan
         $query = Purchase::query();
-
+    
         // Terapkan filter berdasarkan peran pengguna
         if (auth()->user()->role_id == Role::USER) {
             $query->where('user_id', auth()->user()->id);
         }
-
+    
         // Kecualikan nilai doc_no yang sudah ditampilkan
         if ($request->has('excluded_doc_nos')) {
             $excludedDocNos = explode(',', $request->excluded_doc_nos);
             $query->whereNotIn('doc_no', $excludedDocNos);
         }
-
+    
         // Terapkan filter menggunakan Pipeline
         $filteredQuery = app(Pipeline::class)
             ->send($query)
@@ -158,7 +157,7 @@ class PurchaseController extends Controller
                 BySearch::class,
             ])
             ->thenReturn();
-
+    
         // Terapkan pengurutan berdasarkan tab yang dipilih
         if ($request->has('tab')) {
             if ($request->tab == Purchase::TAB_SUBMIT) {
@@ -172,45 +171,40 @@ class PurchaseController extends Controller
             // Pengurutan default jika tidak ada tab yang dipilih
             $filteredQuery->orderBy('date', 'desc');
         }
-
+    
         // Tentukan jumlah item per halaman dan halaman saat ini dari pengaturan default Laravel
-        $perPage = $request->input('per_page', 15);
+        $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
-
+    
         // Gunakan subquery untuk mendapatkan daftar doc_no yang unik dengan paginasi
         $distinctDocNosQuery = $filteredQuery->distinct('doc_no')->pluck('doc_no');
+        $totalDocNos = $distinctDocNosQuery->count();
         $paginatedDocNos = $distinctDocNosQuery->forPage($page, $perPage)->values();
-
+    
         // Jika tidak ada doc_no yang dipaginasi, kembalikan koleksi kosong
         if ($paginatedDocNos->isEmpty()) {
             return new PurchaseCollection(new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage, $page));
         }
-
+    
         // Ambil catatan pembelian lengkap berdasarkan nilai doc_no yang dipaginasi
         $purchases = Purchase::whereIn('doc_no', $paginatedDocNos)
             ->orderByRaw("FIELD(doc_no, " . $paginatedDocNos->map(function ($doc_no) {
                 return "'$doc_no'";
             })->implode(',') . ")")
             ->get();
-
+    
         // Buat instance paginator secara manual
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
             $purchases,
-            $distinctDocNosQuery->count(),
+            $totalDocNos,
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
         );
-
+    
         return new PurchaseCollection($paginator);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error fetching purchases: ' . $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
     }
-}
-
+    
 
     public function purchaseall(Request $request)
     {
