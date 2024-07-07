@@ -129,10 +129,10 @@ class PurchaseController extends Controller
     public function index(Request $request)
     {
         $query = Purchase::query();
-    
+        
         // Tambahkan filter berdasarkan tanggal terkini
         // $query->whereDate('date', Carbon::today());
-
+    
         // Terapkan filter berdasarkan peran pengguna
         if (auth()->user()->role_id == Role::USER) {
             $query->where('user_id', auth()->user()->id);
@@ -152,7 +152,7 @@ class PurchaseController extends Controller
                 BySearch::class,
             ])
             ->thenReturn();
-    
+        
         // kondisi untuk pengurutan berdasarkan tab
         if (request()->has('tab')) {
             if (request('tab') == Purchase::TAB_SUBMIT) {
@@ -166,11 +166,12 @@ class PurchaseController extends Controller
             // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
             $purchases->orderBy('date', 'desc');
         }
-    
-        $purchases = $purchases->paginate($request->per_page);
-    
+        
+        $purchases = $purchases->distinct()->paginate($request->per_page);
+        
         return new PurchaseCollection($purchases);
     }
+    
 
     public function purchaseall(Request $request)
     {
