@@ -167,6 +167,7 @@ class PurchaseController extends Controller
             $purchases->orderBy('date', 'desc');
         }
 
+        // Pastikan urutan dan pagination diterapkan setelah query dibangun
         $purchases = $purchases->paginate($request->per_page);
 
         return new PurchaseCollection($purchases);
