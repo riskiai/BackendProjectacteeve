@@ -127,51 +127,49 @@ class PurchaseController extends Controller
 
 
     public function index(Request $request)
-    {
-        $query = Purchase::query();
-        
-        // Tambahkan filter berdasarkan tanggal terkini
-        // $query->whereDate('date', Carbon::today());
-    
-        // Terapkan filter berdasarkan peran pengguna
-        if (auth()->user()->role_id == Role::USER) {
-            $query->where('user_id', auth()->user()->id);
-        }
-        
-        $purchases = app(Pipeline::class)
-            ->send($query)
-            ->through([
-                ByDate::class,
-                ByUpdated::class,
-                ByPurchaseID::class,
-                ByTab::class,
-                ByStatus::class,
-                ByVendor::class,
-                ByProject::class,
-                ByTax::class,
-                BySearch::class,
-            ])
-            ->thenReturn();
-        
-        // Kondisi untuk pengurutan berdasarkan tab
-        if (request()->has('tab')) {
-            if (request('tab') == Purchase::TAB_SUBMIT) {
-                $purchases->orderBy('date', 'desc');
-            } elseif (in_array(request('tab'), [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
-                $purchases->orderBy('due_date', 'asc');
-            } elseif (request('tab') == Purchase::TAB_PAID) {
-                $purchases->orderBy('updated_at', 'desc');
-            }
-        } else {
-            // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
-            $purchases->orderBy('date', 'desc');
-        }
-    
-        // Gunakan group by pada doc_no untuk menghindari duplikasi
-        $purchases = $purchases->groupBy('doc_no')->distinct()->paginate($request->per_page);
-        
-        return new PurchaseCollection($purchases);
+{
+    $query = Purchase::query();
+
+    // Tambahkan filter berdasarkan peran pengguna
+    if (auth()->user()->role_id == Role::USER) {
+        $query->where('user_id', auth()->user()->id);
     }
+    
+    $purchases = app(Pipeline::class)
+        ->send($query)
+        ->through([
+            ByDate::class,
+            ByUpdated::class,
+            ByPurchaseID::class,
+            ByTab::class,
+            ByStatus::class,
+            ByVendor::class,
+            ByProject::class,
+            ByTax::class,
+            BySearch::class,
+        ])
+        ->thenReturn();
+
+    // Kondisi untuk pengurutan berdasarkan tab
+    if (request()->has('tab')) {
+        if (request('tab') == Purchase::TAB_SUBMIT) {
+            $purchases->orderBy('date', 'desc');
+        } elseif (in_array(request('tab'), [Purchase::TAB_VERIFIED, Purchase::TAB_PAYMENT_REQUEST])) {
+            $purchases->orderBy('due_date', 'asc');
+        } elseif (request('tab') == Purchase::TAB_PAID) {
+            $purchases->orderBy('updated_at', 'desc');
+        }
+    } else {
+        // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
+        $purchases->orderBy('date', 'desc');
+    }
+
+    // Gunakan group by pada doc_no untuk menghindari duplikasi
+    $purchases = $purchases->groupBy('doc_no', 'due_date', 'updated_at')->distinct()->paginate($request->get('per_page', 15));
+    
+    return new PurchaseCollection($purchases);
+}
+
     
 
     public function purchaseall(Request $request)
