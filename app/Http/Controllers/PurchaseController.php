@@ -153,7 +153,7 @@ class PurchaseController extends Controller
             ])
             ->thenReturn();
         
-        // kondisi untuk pengurutan berdasarkan tab
+        // Kondisi untuk pengurutan berdasarkan tab
         if (request()->has('tab')) {
             if (request('tab') == Purchase::TAB_SUBMIT) {
                 $purchases->orderBy('date', 'desc');
@@ -166,8 +166,9 @@ class PurchaseController extends Controller
             // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
             $purchases->orderBy('date', 'desc');
         }
-        
-        $purchases = $purchases->distinct()->paginate($request->per_page);
+    
+        // Gunakan group by pada doc_no untuk menghindari duplikasi
+        $purchases = $purchases->groupBy('doc_no')->distinct()->paginate($request->get('per_page', 15));
         
         return new PurchaseCollection($purchases);
     }
