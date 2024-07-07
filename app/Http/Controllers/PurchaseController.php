@@ -173,15 +173,13 @@ class PurchaseController extends Controller
             $filteredQuery->orderBy('date', 'desc');
         }
 
-        // Dapatkan nilai doc_no yang unik
-        $distinctDocNos = $filteredQuery->select('doc_no')->distinct()->pluck('doc_no');
-
         // Tentukan jumlah item per halaman dan halaman saat ini dari pengaturan default Laravel
         $perPage = $request->input('per_page', 15);
         $page = $request->input('page', 1);
 
-        // Paginasikan nilai doc_no yang unik
-        $paginatedDocNos = $distinctDocNos->slice(($page - 1) * $perPage, $perPage);
+        // Gunakan subquery untuk mendapatkan daftar doc_no yang unik dengan paginasi
+        $distinctDocNosQuery = $filteredQuery->distinct('doc_no')->pluck('doc_no');
+        $paginatedDocNos = $distinctDocNosQuery->forPage($page, $perPage)->values();
 
         // Jika tidak ada doc_no yang dipaginasi, kembalikan koleksi kosong
         if ($paginatedDocNos->isEmpty()) {
@@ -198,7 +196,7 @@ class PurchaseController extends Controller
         // Buat instance paginator secara manual
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
             $purchases,
-            $distinctDocNos->count(),
+            $distinctDocNosQuery->count(),
             $perPage,
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
