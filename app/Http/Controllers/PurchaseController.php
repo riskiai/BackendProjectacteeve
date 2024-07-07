@@ -165,15 +165,15 @@ class PurchaseController extends Controller
         $query->orderBy('date', 'desc');
     }
 
-    // Subquery untuk memilih ID unik
-    $subQuery = $query->select('id')->groupBy('doc_no');
-
-    // Query utama untuk mengambil data unik berdasarkan subquery
-    $purchases = Purchase::whereIn('id', $subQuery)
-        ->paginate($request->get('per_page', 15));
+    // Gunakan select dan groupBy untuk memastikan keunikan data
+    $purchases = $query->select('doc_no', 'doc_type', 'tab', 'purchase_id', 'purchase_category_id', 'company_id', 'project_id', 'purchase_status_id', 'description', 'remarks', 'sub_total', 'ppn', 'pph', 'date', 'due_date', 'created_at', 'updated_at', 'reject_note', 'user_id')
+                       ->groupBy('doc_no', 'doc_type', 'tab', 'purchase_id', 'purchase_category_id', 'company_id', 'project_id', 'purchase_status_id', 'description', 'remarks', 'sub_total', 'ppn', 'pph', 'date', 'due_date', 'created_at', 'updated_at', 'reject_note', 'user_id')
+                       ->distinct()
+                       ->paginate($request->get('per_page', 15));
 
     return new PurchaseCollection($purchases);
 }
+
 
 
     public function purchaseall(Request $request)
