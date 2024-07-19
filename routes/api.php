@@ -96,8 +96,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('purchase/undo/{id}', [PurchaseController::class, 'undo']);
     Route::put('purchase/accept/{id}', [PurchaseController::class, 'accept']);
     Route::put('purchase/reject/{id}', [PurchaseController::class, 'reject']);
+    
     Route::put('purchase/request/{id}', [PurchaseController::class, 'request']);
+    Route::put('purchase/multiple-payment', [PurchaseController::class, 'multiplePaymentRequest']);
     Route::put('purchase/payment/{id}', [PurchaseController::class, 'payment']);
+    
     Route::put('purchase/updatepayment/{id}', [PurchaseController::class, 'updatepayment']);
     Route::put('purchase/updateproject/{id}', [PurchaseController::class, 'updateproject']);
     Route::delete('purchase/delete-document/{id}', [PurchaseController::class, 'deleteDocument']);

@@ -180,7 +180,6 @@ class PurchaseController extends Controller
         return new PurchaseCollection($purchases);
     }
     
-    
 
     public function purchaseall(Request $request)
     {
@@ -299,7 +298,6 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
-
 
 
     public function show($docNo)
@@ -528,6 +526,43 @@ class PurchaseController extends Controller
         }
     }
 
+    public function multiplePaymentRequest(Request $request)
+    {
+        $docNos = $request->input('doc_nos'); // array of doc_no
+        DB::beginTransaction();
+
+        try {
+            $processedDocNos = [];
+
+            foreach ($docNos as $docNo) {
+                $purchase = Purchase::where('doc_no', $docNo)->first();
+                if ($purchase) {
+                    $purchase->logs()->updateOrCreate([
+                        'tab' => Purchase::TAB_PAID,
+                        'name' => auth()->user()->name
+                    ], [
+                        'name' => auth()->user()->name
+                    ]);
+
+                    $purchase->update([
+                        'purchase_status_id' => PurchaseStatus::PAID,
+                        'tab' => Purchase::TAB_PAID,
+                    ]);
+
+                    $processedDocNos[] = $docNo;
+                }
+            }
+
+            DB::commit();
+            $docNosString = implode(', ', $processedDocNos);
+            return MessageActeeve::success("Purchases with doc_no: $docNosString have been paid successfully.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return MessageActeeve::error($th->getMessage());
+        }
+    }
+
+
     public function payment($docNo)
     {
         DB::beginTransaction();
@@ -558,6 +593,8 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
+
+    
 
     public function updatepayment(Request $request, $docNo)
     {
@@ -813,7 +850,7 @@ class PurchaseController extends Controller
     }
 
 
-    // =======
+   
     protected function saveDocument($purchase, $file, $iteration)
     {
         $document = $file->store(Purchase::ATTACHMENT_FILE);

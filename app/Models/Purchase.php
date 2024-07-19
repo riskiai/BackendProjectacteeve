@@ -11,6 +11,10 @@ class Purchase extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'doc_no'; // Set doc_no as the primary key
+    public $incrementing = false; // Indicate that the primary key is not auto-incrementing
+    protected $keyType = 'string'; // Indicate that the primary key is of string type
+
     const ATTACHMENT_FILE = 'attachment/purchase';
 
     const TAB_SUBMIT = 1;
