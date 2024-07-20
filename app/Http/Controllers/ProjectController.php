@@ -78,6 +78,11 @@ class ProjectController extends Controller
             $query->whereBetween('date', $date); // Ganti 'created_at' sesuai dengan kolom yang sesuai
         }
 
+        if ($request->has('year')) {
+            $year = $request->year;
+            $query->whereYear('date', $year);
+        }
+
         $projects = $query->orderBy('created_at', 'desc')->paginate($request->per_page);
 
         return new ProjectCollection($projects);
