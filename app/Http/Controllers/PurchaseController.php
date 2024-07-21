@@ -128,61 +128,60 @@ class PurchaseController extends Controller
 
 
     public function index(Request $request)
-{
-    $query = Purchase::query();
-    
-    // Tambahkan filter berdasarkan tanggal terkini (komentar saja)
-    // $query->whereDate('date', Carbon::today());
+    {
+        $query = Purchase::query();
+        
+        // Tambahkan filter berdasarkan tanggal terkini (komentar saja)
+        // $query->whereDate('date', Carbon::today());
 
-    // Terapkan filter berdasarkan peran pengguna
-    if (auth()->user()->role_id == Role::USER) {
-        $query->where('user_id', auth()->user()->id);
-    }
-
-    $purchases = app(Pipeline::class)
-        ->send($query)
-        ->through([
-            ByDate::class,
-            ByUpdated::class,
-            ByPurchaseID::class,
-            ByTab::class,
-            ByStatus::class,
-            ByVendor::class,
-            ByProject::class,
-            ByTax::class,
-            BySearch::class,
-            ByDocType::class,  // Tambahkan filter ByDocType di sini
-        ])
-        ->thenReturn();
-
-    // Kondisi untuk pengurutan berdasarkan tab
-    if ($request->has('tab')) {
-        switch ($request->get('tab')) {
-            case Purchase::TAB_SUBMIT:
-                $purchases->orderBy('date', 'desc')->orderBy('doc_no', 'desc');
-                break;
-            case Purchase::TAB_VERIFIED:
-            case Purchase::TAB_PAYMENT_REQUEST:
-                $purchases->orderBy('due_date', 'asc')->orderBy('doc_no', 'asc');
-                break;
-            case Purchase::TAB_PAID:
-                $purchases->orderBy('updated_at', 'desc')->orderBy('doc_no', 'desc');
-                break;
-            default:
-                $purchases->orderBy('date', 'desc')->orderBy('doc_no', 'desc');
-                break;
+        // Terapkan filter berdasarkan peran pengguna
+        if (auth()->user()->role_id == Role::USER) {
+            $query->where('user_id', auth()->user()->id);
         }
-    } else {
-        // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
-        $purchases->orderBy('date', 'desc')->orderBy('doc_no', 'desc');
+
+        $purchases = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                ByDate::class,
+                ByUpdated::class,
+                ByPurchaseID::class,
+                ByTab::class,
+                ByStatus::class,
+                ByVendor::class,
+                ByProject::class,
+                ByTax::class,
+                BySearch::class,
+                ByDocType::class,  // Tambahkan filter ByDocType di sini
+            ])
+            ->thenReturn();
+
+        // Kondisi untuk pengurutan berdasarkan tab
+        if ($request->has('tab')) {
+            switch ($request->get('tab')) {
+                case Purchase::TAB_SUBMIT:
+                    $purchases->orderBy('date', 'desc')->orderBy('doc_no', 'desc');
+                    break;
+                case Purchase::TAB_VERIFIED:
+                case Purchase::TAB_PAYMENT_REQUEST:
+                    $purchases->orderBy('due_date', 'asc')->orderBy('doc_no', 'asc');
+                    break;
+                case Purchase::TAB_PAID:
+                    $purchases->orderBy('updated_at', 'desc')->orderBy('doc_no', 'desc');
+                    break;
+                default:
+                    $purchases->orderBy('date', 'desc')->orderBy('doc_no', 'desc');
+                    break;
+            }
+        } else {
+            // Jika tidak ada tab yang dipilih, urutkan berdasarkan date secara descending
+            $purchases->orderBy('date', 'desc')->orderBy('doc_no', 'desc');
+        }
+
+        $purchases = $purchases->paginate($request->per_page);
+
+        return new PurchaseCollection($purchases);
     }
 
-    $purchases = $purchases->paginate($request->per_page);
-
-    return new PurchaseCollection($purchases);
-}
-
-    
 
     public function purchaseall(Request $request)
     {
@@ -533,6 +532,12 @@ class PurchaseController extends Controller
     public function multiplePaymentRequest(Request $request)
     {
         $docNos = $request->input('doc_nos'); // array of doc_no
+        $updatedAt = $request->input('updated_at'); // date input
+
+        if (!$updatedAt) {
+            return MessageActeeve::error('Payment date is required!');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -541,16 +546,20 @@ class PurchaseController extends Controller
             foreach ($docNos as $docNo) {
                 $purchase = Purchase::where('doc_no', $docNo)->first();
                 if ($purchase) {
-                    $purchase->logs()->updateOrCreate([
+                    // Pastikan updated_at diisi dengan benar
+                    $purchase->logs()->create([
                         'tab' => Purchase::TAB_PAID,
-                        'name' => auth()->user()->name
+                        'name' => auth()->user()->name,
                     ], [
-                        'name' => auth()->user()->name
+                        'name' => auth()->user()->name,
+                        'updated_at' => $updatedAt
                     ]);
 
-                    $purchase->update([
+                    // Gunakan Query Builder untuk memperbarui tanpa Eloquent
+                    DB::table('purchases')->where('doc_no', $docNo)->update([
                         'purchase_status_id' => PurchaseStatus::PAID,
                         'tab' => Purchase::TAB_PAID,
+                        'updated_at' => $updatedAt,
                     ]);
 
                     $processedDocNos[] = $docNo;
@@ -565,6 +574,7 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
+
 
 
     public function payment($docNo)
