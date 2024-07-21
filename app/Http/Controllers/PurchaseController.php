@@ -534,8 +534,9 @@ class PurchaseController extends Controller
         $docNos = $request->input('doc_nos'); // array of doc_no
         $updatedAt = $request->input('updated_at'); // date input
 
+        // Jika updated_at tidak diberikan, gunakan tanggal sekarang
         if (!$updatedAt) {
-            return MessageActeeve::error('Payment date is required!');
+            $updatedAt = now();
         }
 
         DB::beginTransaction();
@@ -574,6 +575,7 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
+
 
 
 
