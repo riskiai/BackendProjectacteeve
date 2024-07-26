@@ -22,6 +22,7 @@ use App\Facades\Filters\Purchase\ByTab;
 use App\Facades\Filters\Purchase\ByTax;
 use Illuminate\Support\Facades\Storage;
 use App\Facades\Filters\Purchase\ByDate;
+use App\Facades\Filters\Purchase\ByDuedate;
 use App\Facades\Filters\Purchase\BySearch;
 use App\Facades\Filters\Purchase\ByStatus;
 use App\Facades\Filters\Purchase\ByVendor;
@@ -151,7 +152,8 @@ class PurchaseController extends Controller
                 ByProject::class,
                 ByTax::class,
                 BySearch::class,
-                ByDocType::class,  // Tambahkan filter ByDocType di sini
+                ByDocType::class, 
+                ByDueDate::class,
             ])
             ->thenReturn();
 
@@ -208,6 +210,7 @@ class PurchaseController extends Controller
                 ByTax::class,
                 BySearch::class,
                 ByDocType::class,
+                ByDueDate::class,
             ])
             ->thenReturn();
 
@@ -575,9 +578,6 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
-
-
-
 
     public function payment($docNo)
     {
