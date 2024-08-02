@@ -334,10 +334,11 @@ class PurchaseController extends Controller
                 "date" => $purchase->date,
                 "due_date" => $purchase->due_date,
                 "ppn" => $this->getPpn($purchase),
-                "log" => $purchase->logs()->select('name', 'created_at')->where('note_reject', null)->latest()->first(),
+                "log" => $purchase->logs()->select('name', 'created_at', 'updated_at')->where('note_reject', null)->latest()->first(),
                 "logs_rejected" => $purchase->logs()->select('name', 'note_reject', 'created_at')->where('note_reject', '!=', null)->orderBy('id', 'desc')->get(),
-                "created_at" => $purchase->created_at->format('Y-m-d'),
-                "updated_at" => $purchase->updated_at->format('Y-m-d'),  
+                "created_at" => $purchase->created_at->format('Y-m-d H:i:s'),
+                "updated_at" => $purchase->updated_at->format('Y-m-d H:i:s'),
+
             ];
 
             if ($purchase->user) {
@@ -609,8 +610,6 @@ class PurchaseController extends Controller
             return MessageActeeve::error($th->getMessage());
         }
     }
-
-    
 
     public function updatepayment(Request $request, $docNo)
     {
